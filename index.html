@@ -2,23 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HLS Playback: Video.js + VHS with hls.js Fallback</title>
+  <title>Universal HLS Player – Video.js VHS (mobile + desktop)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Video.js CSS -->
+  <!-- Video.js core CSS -->
   <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
+  <!-- Source selector plugin CSS (optional minimal styling) -->
   <style>
     :root {
       --bg:#0f111a;
       --card:#1f233a;
-      --radius:1rem;
-      --shadow:0 20px 40px -10px rgba(0,0,0,.4);
-      --radius-sm:.75rem;
+      --radius:14px;
       font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
     }
-    * {box-sizing:border-box;}
+    *{box-sizing:border-box;}
     body {
       margin:0;
-      background: var(--bg);
+      background:var(--bg);
       color:#eee;
       min-height:100vh;
       display:flex;
@@ -28,38 +27,37 @@
       gap:1rem;
     }
     h1 {
+      font-size:1.6rem;
       margin:0;
-      font-size:1.75rem;
       text-align:center;
     }
-    .player-card {
+    .player-wrapper {
       width:100%;
       max-width:960px;
-      background: var(--card);
-      border-radius: var(--radius);
-      padding:1rem;
-      box-shadow: var(--shadow);
-      display:flex;
-      flex-direction:column;
-      gap:0.5rem;
+      position:relative;
     }
-    #video-wrapper {
-      position: relative;
-    }
-    .info {
+    .note {
       font-size:0.85rem;
-      opacity:.85;
+      margin-top:6px;
+      opacity:.8;
       word-break: break-all;
+    }
+    .error {
+      margin-top:8px;
+      background:#b33;
+      padding:8px 12px;
+      border-radius:8px;
+      font-size:0.85rem;
     }
     .controls {
       display:flex;
       gap:8px;
       flex-wrap: wrap;
-      align-items:center;
       margin-top:4px;
+      align-items:center;
     }
     button {
-      background: #406bff;
+      background:#4f7fff;
       border:none;
       padding:8px 14px;
       border-radius:8px;
@@ -67,172 +65,119 @@
       color:#fff;
       font-size:0.9rem;
     }
-    .error-banner {
-      background:#b33;
-      padding:10px;
-      border-radius:6px;
-      margin-top:6px;
-      font-size:0.9rem;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
     code {
       background:rgba(255,255,255,.08);
-      padding:2px 4px;
+      padding:2px 5px;
       border-radius:4px;
-      font-size:0.82rem;
     }
-    .tagline {
-      font-size:0.9rem;
-      opacity:.7;
+    .quality-label {
+      margin-left: auto;
+      font-size:0.85rem;
+      opacity:.9;
     }
   </style>
 </head>
 <body>
-  <h1>HLS Playback with Video.js + VHS + hls.js Fallback</h1>
-  <div class="player-card" aria-label="HLS player container">
-    <div id="video-wrapper">
-      <video
-        id="hls-player"
-        class="video-js vjs-big-play-centered"
-        controls
-        preload="auto"
-        playsinline
-        data-setup='{}'
-        style="width:100%;border-radius:12px;"
-      >
-        <p class="vjs-no-js">
-          To view this video please enable JavaScript and use a modern browser.
-        </p>
-      </video>
-    </div>
-    <div class="info">
-      Source manifest: <code>http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8</code>
+  <h1>HLS Player (Video.js VHS) – Mobile & Desktop</h1>
+  <div class="player-wrapper">
+    <video
+      id="videojs-hls"
+      class="video-js vjs-big-play-centered"
+      controls
+      preload="auto"
+      playsinline
+      data-setup='{}'
+      style="width:100%; height:auto; border-radius:12px;"
+      poster=""
+    >
+      <p class="vjs-no-js">
+        To view this video please enable JavaScript and use a modern browser.
+      </p>
+    </video>
+    <div class="note">
+      Source manifest: <code id="manifest-code">http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8</code>
     </div>
     <div class="controls">
-      <button id="reload-btn">Reload Stream</button>
-      <div class="tagline">Auto retry with exponential backoff; fallback to hls.js if VHS fails.</div>
+      <button id="reload-btn">Reload</button>
+      <div class="quality-label">Quality selector available in the settings gear.</div>
     </div>
-    <div id="error-container" aria-live="polite"></div>
+    <div id="error-box" aria-live="polite"></div>
   </div>
 
-  <!-- Dependencies -->
+  <!-- Video.js -->
   <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@2.3.0/dist/hls.min.js"></script>
+  <!-- videojs-http-source-selector plugin (adds quality selector) -->
+  <script src="https://unpkg.com/videojs-http-source-selector@1.1.10/dist/videojs-http-source-selector.min.js"></script>
 
   <script>
-    (function () {
-      const manifestUrl = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
-      const player = videojs('hls-player', {
+    (() => {
+      const manifest = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
+      document.getElementById('manifest-code').textContent = manifest;
+
+      // Initialize player with VHS (built-in)
+      const player = videojs('videojs-hls', {
         fluid: true,
         liveui: true,
         autoplay: false,
-        errorDisplay: true
-      });
-
-      const maxRetries = 3;
-      const baseBackoffMs = 1000;
-      let attempt = 0;
-      const errorContainer = document.getElementById('error-container');
-
-      function clearErrors() {
-        errorContainer.innerHTML = '';
-      }
-
-      function showError(msg) {
-        const d = document.createElement('div');
-        d.className = 'error-banner';
-        d.textContent = msg;
-        errorContainer.appendChild(d);
-      }
-
-      function tryVhsLoad() {
-        attempt++;
-        console.log('VHS attempt', attempt);
-        clearErrors();
-        player.src({ src: manifestUrl, type: 'application/x-mpegURL' });
-
-        const onError = () => {
-          const err = player.error();
-          console.warn('VHS error:', err);
-          if (attempt < maxRetries) {
-            const delay = baseBackoffMs * Math.pow(2, attempt - 1);
-            showError(`VHS failed (attempt ${attempt}). Retrying in ${delay}ms...`);
-            setTimeout(() => {
-              player.off('error', onError);
-              tryVhsLoad();
-            }, delay);
-          } else {
-            showError('VHS failed after retries. Falling back to hls.js.'); 
-            player.off('error', onError);
-            fallbackToHlsJs();
+        errorDisplay: true,
+        html5: {
+          hls: {
+            overrideNative: false // Let native on Safari; VHS elsewhere
           }
-        };
-
-        player.once('error', onError);
-      }
-
-      function fallbackToHlsJs() {
-        const videoEl = player.tech().el();
-
-        if (window.Hls && Hls.isSupported()) {
-          const hls = new Hls({
-            capLevelToPlayerSize: true,
-            maxBufferLength: 30
-          });
-          let hlsAttempt = 0;
-
-          const tryHls = () => {
-            hlsAttempt++;
-            console.log('hls.js attempt', hlsAttempt);
-            hls.loadSource(manifestUrl);
-            hls.attachMedia(videoEl);
-            hls.on(Hls.Events.ERROR, (event, data) => {
-              const { type, details, fatal } = data;
-              console.warn('hls.js error', type, details, 'fatal=', fatal);
-              if (fatal) {
-                if (hlsAttempt < maxRetries) {
-                  const delay = baseBackoffMs * Math.pow(2, hlsAttempt - 1);
-                  showError(`hls.js fatal error; retrying in ${delay}ms...`);
-                  setTimeout(() => {
-                    hls.destroy();
-                    fallbackToHlsJs(); // fresh attempt
-                  }, delay);
-                } else {
-                  showError('hls.js failed after retries. Playback unavailable.');
-                }
-              }
-            });
-          };
-
-          tryHls();
-        } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-          // Native Safari fallback
-          videoEl.src = manifestUrl;
-          videoEl.addEventListener('error', () => {
-            showError('Native HLS playback failed in this browser.');
-          });
-        } else {
-          showError('No HLS support available in this environment.');
         }
+      });
+
+      // Initialize quality selector plugin
+      if (player.httpSourceSelector) {
+        player.httpSourceSelector({
+          default: 'auto',
+          customLabel: 'Quality'
+        });
+        // Place the menu in control bar
+        player.getChild('controlBar').addChild('HttpSourceSelector');
       }
 
-      // Start initial load
-      tryVhsLoad();
+      // Load source
+      function loadSource() {
+        clearError();
+        player.src({
+          src: manifest,
+          type: 'application/x-mpegURL'
+        });
+      }
 
+      // Reload button
       document.getElementById('reload-btn').addEventListener('click', () => {
-        attempt = 0;
-        tryVhsLoad();
+        loadSource();
+        player.play().catch(() => {});
       });
 
-      // Optional logging
+      // Error display helper
+      const errorBox = document.getElementById('error-box');
+      function showError(msg) {
+        errorBox.innerHTML = '';
+        const d = document.createElement('div');
+        d.className = 'error';
+        d.textContent = msg;
+        errorBox.appendChild(d);
+      }
+      function clearError() {
+        errorBox.textContent = '';
+      }
+
+      // Error handling: fallback hints
+      player.on('error', () => {
+        const err = player.error();
+        console.warn('Video.js error:', err);
+        showError(err && err.message ? `Playback error: ${err.message}` : 'Unknown playback error.');
+      });
+
       player.on('loadedmetadata', () => {
-        console.log('Metadata loaded; duration:', player.duration());
+        clearError();
       });
-      player.on('play', () => {
-        console.log('Playback started');
-      });
+
+      // Kick off initial load
+      loadSource();
     })();
   </script>
 </body>
