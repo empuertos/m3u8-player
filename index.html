@@ -1,62 +1,116 @@
-// worker.js -- Cloudflare Worker (ES Module)
-const HLS_SOURCE = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
-
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-
-    // Proxy the .m3u8 (so the page can avoid some CORS/mixed-content issues if needed)
-    if (url.pathname === '/proxy.m3u8') {
-      // Simple passthrough proxy
-      const upstream = HLS_SOURCE;
-      const resp = await fetch(upstream);
-      // Copy headers but ensure CORS
-      const headers = new Headers(resp.headers);
-      headers.set('Access-Control-Allow-Origin', '*');
-      headers.set('Content-Type', 'application/vnd.apple.mpegurl');
-      return new Response(resp.body, {
-        status: resp.status,
-        headers
-      });
-    }
-
-    // Serve HTML page with Video.js player
-    if (url.pathname === '/' || url.pathname === '/index.html') {
-      const html = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<title>Cloudworker Video.js HLS Player</title>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet"/>
-<style>
-  body{margin:0;background:#0f111a;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;display:flex;flex-direction:column;align-items:center;padding:1rem;}
-  .player-container{width:100%;max-width:960px;}
-  h1{margin:0 0 .5rem;font-size:1.5rem;text-align:center;}
-  .info{font-size:.85rem;margin-top:.5rem;word-break:break-all;opacity:.9;}
-  .error{margin-top:.5rem;background:#b33;padding:8px;border-radius:6px;font-size:.85rem;}
-</style>
+  <meta charset="UTF-8" />
+  <title>HLS Player – Video.js VHS (mobile + desktop)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0f111a;
+      --card:#1f233a;
+      --radius:14px;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    }
+    *{box-sizing:border-box;}
+    body {
+      margin:0;
+      background:var(--bg);
+      color:#eee;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:1rem;
+      gap:1rem;
+    }
+    h1 {
+      font-size:1.6rem;
+      margin:0;
+      text-align:center;
+    }
+    .player-wrapper {
+      width:100%;
+      max-width:960px;
+      position:relative;
+    }
+    .note {
+      font-size:0.85rem;
+      margin-top:6px;
+      opacity:.8;
+      word-break: break-all;
+    }
+    .error {
+      margin-top:8px;
+      background:#b33;
+      padding:8px 12px;
+      border-radius:8px;
+      font-size:0.85rem;
+    }
+    .controls {
+      display:flex;
+      gap:8px;
+      flex-wrap: wrap;
+      margin-top:4px;
+      align-items:center;
+    }
+    button {
+      background:#4f7fff;
+      border:none;
+      padding:8px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      color:#fff;
+      font-size:0.9rem;
+    }
+    code {
+      background:rgba(255,255,255,.08);
+      padding:2px 5px;
+      border-radius:4px;
+    }
+    .quality-label {
+      margin-left: auto;
+      font-size:0.85rem;
+      opacity:.9;
+    }
+  </style>
 </head>
 <body>
-  <h1>Video.js VHS HLS Player (via Cloudflare Worker)</h1>
-  <div class="player-container">
-    <video id="player" class="video-js vjs-big-play-centered" controls preload="auto" playsinline data-setup='{}' style="width:100%;border-radius:10px;">
-      <p class="vjs-no-js">Enable JavaScript to view the player.</p>
+  <h1>HLS Player (Video.js VHS) – Mobile & Desktop</h1>
+  <div class="player-wrapper">
+    <video
+      id="videojs-hls"
+      class="video-js vjs-big-play-centered"
+      controls
+      preload="auto"
+      playsinline
+      data-setup='{}'
+      style="width:100%; height:auto; border-radius:12px;"
+      poster=""
+    >
+      <p class="vjs-no-js">
+        To view this video please enable JavaScript and use a modern browser.
+      </p>
     </video>
-    <div class="info">
-      Playing manifest proxied at <code>/proxy.m3u8</code> (original: ${HLS_SOURCE})
+    <div class="note">
+      Source manifest: <code>http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8</code>
+    </div>
+    <div class="controls">
+      <button id="reload-btn">Reload</button>
+      <div class="quality-label">Video.js VHS will handle HLS; Safari uses native HLS.</div>
     </div>
     <div id="error-box" aria-live="polite"></div>
   </div>
 
   <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
   <script>
-    (function(){
-      const manifest = location.origin + '/proxy.m3u8'; // proxied to avoid CORS/mixed issues
-      const player = videojs('player', {
+    (() => {
+      const manifest = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
+      const player = videojs('videojs-hls', {
         fluid: true,
         liveui: true,
         autoplay: false,
+        errorDisplay: true,
         html5: {
           hls: {
             overrideNative: false
@@ -64,7 +118,10 @@ export default {
         }
       });
 
-      function showError(msg){
+      function clearError() {
+        document.getElementById('error-box').textContent = '';
+      }
+      function showError(msg) {
         const box = document.getElementById('error-box');
         box.innerHTML = '';
         const d = document.createElement('div');
@@ -73,27 +130,31 @@ export default {
         box.appendChild(d);
       }
 
-      player.src({ src: manifest, type: 'application/x-mpegURL' });
+      function loadSource() {
+        clearError();
+        player.src({
+          src: manifest,
+          type: 'application/x-mpegURL'
+        });
+      }
+
+      document.getElementById('reload-btn').addEventListener('click', () => {
+        loadSource();
+        player.play().catch(() => {});
+      });
 
       player.on('error', () => {
-        const e = player.error();
-        console.warn('Playback error:', e);
-        showError(e && e.message ? 'Playback error: ' + e.message : 'Unknown error');
+        const err = player.error();
+        showError(err && err.message ? `Playback error: ${err.message}` : 'Unknown playback error.');
+        console.warn('Video.js error:', err);
       });
 
       player.on('loadedmetadata', () => {
-        console.log('Loaded metadata, duration:', player.duration());
+        clearError();
       });
+
+      loadSource();
     })();
   </script>
 </body>
-</html>`;
-      return new Response(html, {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' }
-      });
-    }
-
-    // Fallback 404
-    return new Response('Not found', { status: 404 });
-  }
-}
+</html>
