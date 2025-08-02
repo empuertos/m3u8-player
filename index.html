@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Video.js HLS Example</title>
+  <title>Video.js VHS HLS Playback</title>
   <!-- Video.js CSS -->
   <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
   <style>
     body {
-      background: #111;
-      color: #fff;
+      background: #121212;
+      color: #eee;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -16,57 +16,73 @@
       margin: 0;
       font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
     }
-    .video-container {
+    .video-wrapper {
       width: 100%;
       max-width: 960px;
+    }
+    .note {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      text-align: center;
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
-  <div class="video-container">
+  <div class="video-wrapper">
     <video
-      id="my-video"
-      class="video-js vjs-default-skin"
+      id="hls-player"
+      class="video-js vjs-big-play-centered"
       controls
       preload="auto"
-      width="960"
-      height="540"
+      playsinline
       data-setup='{}'
       poster=""
     >
-      <!-- Source will be set via JS to ensure VHS handles it -->
       <p class="vjs-no-js">
-        To view this video please enable JavaScript, and consider upgrading to a
-        web browser that
-        <a href="https://videojs.com/html5-video-support/" target="_blank"
-          >supports HTML5 video</a
-        >
+        To view this video please enable JavaScript and use a modern browser.
       </p>
     </video>
+    <div class="note">
+      Source: HLS manifest at <code>http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8</code>
+    </div>
   </div>
 
-  <!-- Video.js JS -->
+  <!-- Video.js library -->
   <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
   <script>
-    // Initialize player
-    const player = videojs('my-video', {
+    // Initialize Video.js player
+    const player = videojs('hls-player', {
+      fluid: true,
+      liveui: true, // better UI for streaming
       autoplay: false,
-      fluid: true, // responsive
-      liveui: true // better UI for live/HLS
     });
 
-    // HLS source (VHS will handle .m3u8)
-    const hlsUrl = 'http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8';
+    // HLS manifest URL
+    const hlsUrl = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
 
+    // Set source (VHS handles HLS natively)
     player.src({
       src: hlsUrl,
       type: 'application/x-mpegURL'
     });
 
-    // Optional: log playback errors for debugging
+    // Debug logging for errors
     player.on('error', () => {
-      const err = player.error();
-      console.error('Video.js error:', err);
+      const e = player.error();
+      console.error('Playback error:', e);
+      const msg = document.createElement('div');
+      msg.style.background = '#b33';
+      msg.style.color = '#fff';
+      msg.style.padding = '8px';
+      msg.style.marginTop = '6px';
+      msg.textContent = 'Playback error: ' + (e && e.message ? e.message : 'unknown');
+      document.querySelector('.video-wrapper').appendChild(msg);
+    });
+
+    // Optional: display when metadata is loaded
+    player.on('loadedmetadata', () => {
+      console.log('Metadata loaded. Duration:', player.duration());
     });
   </script>
 </body>
