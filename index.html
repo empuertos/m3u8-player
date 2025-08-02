@@ -2,61 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Video.js M3U8 Player via Worker</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Video.js HLS Example</title>
+  <!-- Video.js CSS -->
   <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
   <style>
     body {
-      background: #000;
+      background: #111;
       color: #fff;
-      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
       margin: 0;
-      padding: 20px;
-      text-align: center;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
     }
     .video-container {
-      max-width: 900px;
-      margin: auto;
+      width: 100%;
+      max-width: 960px;
     }
   </style>
 </head>
 <body>
-  <h1>Video.js + VHS M3U8 Player</h1>
   <div class="video-container">
     <video
-      id="video"
+      id="my-video"
       class="video-js vjs-default-skin"
       controls
       preload="auto"
-      width="800"
-      height="450"
+      width="960"
+      height="540"
       data-setup='{}'
-    ></video>
+      poster=""
+    >
+      <!-- Source will be set via JS to ensure VHS handles it -->
+      <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to a
+        web browser that
+        <a href="https://videojs.com/html5-video-support/" target="_blank"
+          >supports HTML5 video</a
+        >
+      </p>
+    </video>
   </div>
 
+  <!-- Video.js JS -->
   <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
   <script>
-    // Palitan ito ng Worker mo at target m3u8
-    const workerBase = "http://m3u8-proxy.m3u8-proxybasketball.workers.dev/?url=";
-    const sourceM3u8 =
-      "http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8";
-    const proxiedUrl = workerBase + encodeURIComponent(sourceM3u8);
-
-    const player = videojs("video");
-
-    player.ready(() => {
-      player.src({
-        src: proxiedUrl,
-        type: "application/x-mpegURL"
-      });
-      player.play().catch((e) => {
-        console.warn("Autoplay failed:", e);
-      });
+    // Initialize player
+    const player = videojs('my-video', {
+      autoplay: false,
+      fluid: true, // responsive
+      liveui: true // better UI for live/HLS
     });
 
-    // Optional: error logging
-    player.on("error", () => {
-      console.error("Video.js error:", player.error());
+    // HLS source (VHS will handle .m3u8)
+    const hlsUrl = 'http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8';
+
+    player.src({
+      src: hlsUrl,
+      type: 'application/x-mpegURL'
+    });
+
+    // Optional: log playback errors for debugging
+    player.on('error', () => {
+      const err = player.error();
+      console.error('Video.js error:', err);
     });
   </script>
 </body>
