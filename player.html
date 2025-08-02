@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fixed-size Video.js HLS Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    }
+    .video-container {
+      width: 640px;
+      height: 360px;
+      position: relative;
+      flex: none;
+    }
+    .video-js {
+      width: 640px !important;
+      height: 360px !important;
+      border-radius: 8px;
+      background: #000;
+    }
+    /* On very small screens allow scrolling */
+    @media (max-width: 660px) {
+      body {
+        overflow: auto;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <video
+      id="video-player"
+      class="video-js vjs-big-play-centered"
+      controls
+      preload="auto"
+      playsinline
+      data-setup='{}'
+    >
+      <p class="vjs-no-js">
+        Enable JavaScript and use a modern browser.
+      </p>
+    </video>
+  </div>
+
+  <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
+  <script>
+    const hlsManifest = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
+
+    const player = videojs('video-player', {
+      fluid: false, // disable fluid scaling
+      liveui: true,
+      html5: {
+        hls: {
+          overrideNative: false
+        }
+      }
+    });
+
+    player.src({
+      src: hlsManifest,
+      type: 'application/x-mpegURL'
+    });
+
+    player.on('error', () => {
+      console.error('Playback error:', player.error());
+    });
+  </script>
+</body>
+</html>
