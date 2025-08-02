@@ -2,159 +2,109 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HLS Player – Video.js VHS (mobile + desktop)</title>
+  <title>Video.js YouTube Embed</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Video.js core CSS -->
   <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
+
   <style>
-    :root {
-      --bg:#0f111a;
-      --card:#1f233a;
-      --radius:14px;
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
-    }
-    *{box-sizing:border-box;}
     body {
-      margin:0;
-      background:var(--bg);
-      color:#eee;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      padding:1rem;
-      gap:1rem;
+      margin: 0;
+      background: #0f111a;
+      color: #fff;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      min-height: 100vh;
+      gap: 1rem;
     }
     h1 {
-      font-size:1.6rem;
-      margin:0;
-      text-align:center;
+      margin: 0;
+      font-size: 1.5rem;
+      text-align: center;
     }
     .player-wrapper {
-      width:100%;
-      max-width:960px;
-      position:relative;
+      width: 100%;
+      max-width: 800px;
     }
     .note {
-      font-size:0.85rem;
-      margin-top:6px;
-      opacity:.8;
-      word-break: break-all;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 6px;
     }
     .error {
-      margin-top:8px;
-      background:#b33;
-      padding:8px 12px;
-      border-radius:8px;
-      font-size:0.85rem;
-    }
-    .controls {
-      display:flex;
-      gap:8px;
-      flex-wrap: wrap;
-      margin-top:4px;
-      align-items:center;
-    }
-    button {
-      background:#4f7fff;
-      border:none;
-      padding:8px 14px;
-      border-radius:8px;
-      cursor:pointer;
-      color:#fff;
-      font-size:0.9rem;
-    }
-    code {
-      background:rgba(255,255,255,.08);
-      padding:2px 5px;
-      border-radius:4px;
-    }
-    .quality-label {
-      margin-left: auto;
-      font-size:0.85rem;
-      opacity:.9;
+      margin-top: 8px;
+      background: #b33;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
     }
   </style>
 </head>
 <body>
-  <h1>HLS Player (Video.js VHS) – Mobile & Desktop</h1>
+  <h1>Video.js YouTube Player</h1>
   <div class="player-wrapper">
     <video
-      id="videojs-hls"
+      id="youtube-player"
       class="video-js vjs-big-play-centered"
       controls
-      preload="auto"
-      playsinline
       data-setup='{}'
-      style="width:100%; height:auto; border-radius:12px;"
-      poster=""
+      style="width:100%;height:auto;"
     >
       <p class="vjs-no-js">
         To view this video please enable JavaScript and use a modern browser.
       </p>
     </video>
     <div class="note">
-      Source manifest: <code>https://youtu.be/aGHCyzVqfrQ?si=p0ZVubKFhIgLzhY6</code>
-    </div>
-    <div class="controls">
-      <button id="reload-btn">Reload</button>
-      <div class="quality-label">Video.js VHS will handle HLS; Safari uses native HLS.</div>
+      Source: YouTube video ID <code>aGHCyzVqfrQ</code> (original iframe embed replaced with Video.js wrapper).
     </div>
     <div id="error-box" aria-live="polite"></div>
   </div>
 
+  <!-- Video.js -->
   <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
+  <!-- videojs-youtube tech plugin -->
+  <script src="https://unpkg.com/videojs-youtube/dist/videojs-youtube.min.js"></script>
+
   <script>
-    (() => {
-      const manifest = 'https://youtu.be/aGHCyzVqfrQ?si=p0ZVubKFhIgLzhY6';
-      const player = videojs('videojs-hls', {
-        fluid: true,
-        liveui: true,
-        autoplay: false,
-        errorDisplay: true,
-        html5: {
-          hls: {
-            overrideNative: false
-          }
+    // Initialize Video.js with YouTube tech
+    const player = videojs('youtube-player', {
+      techOrder: ['youtube', 'html5'],
+      sources: [
+        {
+          type: 'video/youtube',
+          src: 'https://www.youtube.com/watch?v=aGHCyzVqfrQ'
         }
-      });
+      ],
+      youtube: {
+        modestbranding: 1,
+        rel: 0,
+        enablejsapi: 1
+      },
+      fluid: true,
+      autoplay: false
+    });
 
-      function clearError() {
-        document.getElementById('error-box').textContent = '';
-      }
-      function showError(msg) {
-        const box = document.getElementById('error-box');
-        box.innerHTML = '';
-        const d = document.createElement('div');
-        d.className = 'error';
-        d.textContent = msg;
-        box.appendChild(d);
-      }
+    const errorBox = document.getElementById('error-box');
+    function showError(msg) {
+      errorBox.innerHTML = '';
+      const d = document.createElement('div');
+      d.className = 'error';
+      d.textContent = msg;
+      errorBox.appendChild(d);
+    }
 
-      function loadSource() {
-        clearError();
-        player.src({
-          src: manifest,
-          type: 'application/x-mpegURL'
-        });
-      }
+    player.on('error', () => {
+      const err = player.error();
+      console.warn('Player error:', err);
+      showError('Playback error: ' + (err && err.message ? err.message : 'unknown'));
+    });
 
-      document.getElementById('reload-btn').addEventListener('click', () => {
-        loadSource();
-        player.play().catch(() => {});
-      });
-
-      player.on('error', () => {
-        const err = player.error();
-        showError(err && err.message ? `Playback error: ${err.message}` : 'Unknown playback error.');
-        console.warn('Video.js error:', err);
-      });
-
-      player.on('loadedmetadata', () => {
-        clearError();
-      });
-
-      loadSource();
-    })();
+    player.ready(() => {
+      console.log('YouTube Video.js player ready.');
+    });
   </script>
 </body>
 </html>
