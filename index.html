@@ -2,87 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Video.js VHS HLS Playback</title>
-  <!-- Video.js CSS -->
-  <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
+  <title>Modular HLS Video.js Player</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     body {
-      background: #121212;
-      color: #eee;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
       margin: 0;
+      background: #0f111a;
+      color: #eee;
       font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
     }
-    .video-wrapper {
+    #player-container {
       width: 100%;
       max-width: 960px;
     }
-    .note {
+    .info {
       margin-top: 0.5rem;
       font-size: 0.9rem;
       text-align: center;
-      opacity: 0.8;
+      opacity: 0.85;
+    }
+    button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #2d7fff;
+      color: #fff;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <div class="video-wrapper">
-    <video
-      id="hls-player"
-      class="video-js vjs-big-play-centered"
-      controls
-      preload="auto"
-      playsinline
-      data-setup='{}'
-      poster=""
-    >
-      <p class="vjs-no-js">
-        To view this video please enable JavaScript and use a modern browser.
-      </p>
-    </video>
-    <div class="note">
-      Source: HLS manifest at <code>http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8</code>
-    </div>
+  <h1>HLS Playback with Video.js + VHS + Fallback</h1>
+  <div id="player-container"></div>
+  <div class="info">
+    Source: <code>http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8</code>
   </div>
+  <button id="reload-btn">Reload Stream</button>
 
-  <!-- Video.js library -->
-  <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
-  <script>
-    // Initialize Video.js player
-    const player = videojs('hls-player', {
-      fluid: true,
-      liveui: true, // better UI for streaming
-      autoplay: false,
+  <script type="module">
+    import { createHlsPlayer } from './src/player.js';
+
+    const manifest = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
+    const player = createHlsPlayer('#player-container', manifest, {
+      maxRetries: 3,
+      baseBackoffMs: 1000
     });
 
-    // HLS manifest URL
-    const hlsUrl = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
-
-    // Set source (VHS handles HLS natively)
-    player.src({
-      src: hlsUrl,
-      type: 'application/x-mpegURL'
-    });
-
-    // Debug logging for errors
-    player.on('error', () => {
-      const e = player.error();
-      console.error('Playback error:', e);
-      const msg = document.createElement('div');
-      msg.style.background = '#b33';
-      msg.style.color = '#fff';
-      msg.style.padding = '8px';
-      msg.style.marginTop = '6px';
-      msg.textContent = 'Playback error: ' + (e && e.message ? e.message : 'unknown');
-      document.querySelector('.video-wrapper').appendChild(msg);
-    });
-
-    // Optional: display when metadata is loaded
-    player.on('loadedmetadata', () => {
-      console.log('Metadata loaded. Duration:', player.duration());
+    document.getElementById('reload-btn').addEventListener('click', () => {
+      player.reload();
     });
   </script>
 </body>
