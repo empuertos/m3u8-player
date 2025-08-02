@@ -29,12 +29,16 @@
       max-width: 960px;
       position: relative;
     }
-    /* fixed size example: uncomment if you want exact 640x360 */
-    /* .video-js { width:640px !important; height:360px !important; } */
+    .video-wrapper {
+      width: 100%;
+      /* fixed aspect ratio 16:9 */
+      aspect-ratio: 16 / 9;
+    }
     .note {
       font-size: 0.9rem;
       opacity: .8;
       word-break: break-all;
+      margin-top: 4px;
     }
     .error {
       margin-top: 6px;
@@ -55,7 +59,7 @@
       border-radius: 6px;
       border: none;
       flex: 1;
-      min-width: 240px;
+      min-width: 220px;
     }
     button {
       background: #4f7fff;
@@ -76,21 +80,23 @@
 <body>
   <h1>M3U8 Video.js HLS Player</h1>
   <div class="player-box">
-    <video
-      id="video-player"
-      class="video-js vjs-big-play-centered"
-      controls
-      preload="auto"
-      playsinline
-      data-setup='{}'
-      style="width:100%; height:auto; border-radius:10px;"
-    >
-      <p class="vjs-no-js">
-        Enable JavaScript and use a modern browser to view the video.
-      </p>
-    </video>
+    <div class="video-wrapper">
+      <video
+        id="video-player"
+        class="video-js vjs-big-play-centered"
+        controls
+        preload="auto"
+        playsinline
+        data-setup='{}'
+        style="width:100%; height:100%; border-radius:8px;"
+      >
+        <p class="vjs-no-js">
+          Enable JavaScript and use a modern browser to view the video.
+        </p>
+      </video>
+    </div>
     <div class="note">
-      Source: <code id="source-label"></code>
+      Source: <code id="source-label">http://content.jwplatform.com/manifests/vM7nH0Kl.m3u8</code>
     </div>
     <div class="controls">
       <input id="src-input" placeholder="Paste .m3u8 URL here" />
@@ -103,7 +109,6 @@
   <!-- Video.js -->
   <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
   <script>
-    // helper: get ?src= query param
     function getQueryParam(name) {
       const params = new URLSearchParams(window.location.search);
       return params.get(name);
@@ -121,7 +126,7 @@
       autoplay: false,
       html5: {
         hls: {
-          overrideNative: false // let Safari use native HLS
+          overrideNative: false
         }
       }
     });
@@ -139,13 +144,14 @@
     document.getElementById('load-btn').addEventListener('click', () => {
       const v = document.getElementById('src-input').value.trim();
       if (v) {
-        setSource(v);
         clearError();
+        setSource(v);
       }
     });
+
     document.getElementById('reload-btn').addEventListener('click', () => {
-      setSource(currentManifest);
       clearError();
+      setSource(currentManifest);
     });
 
     function showError(msg) {
