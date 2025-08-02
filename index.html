@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>M3U8 Video.js HLS Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Video.js CSS -->
+  <link href="https://vjs.zencdn.net/8.0.0/video-js.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background: #0f111a;
+      color: #fff;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      min-height: 100vh;
+      gap: 0.75rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      text-align: center;
+    }
+    .player-box {
+      width: 100%;
+      max-width: 960px;
+      position: relative;
+    }
+    /* fixed size example: uncomment if you want exact 640x360 */
+    /* .video-js { width:640px !important; height:360px !important; } */
+    .note {
+      font-size: 0.9rem;
+      opacity: .8;
+      word-break: break-all;
+    }
+    .error {
+      margin-top: 6px;
+      background: #b33;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 4px;
+    }
+    input {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: none;
+      flex: 1;
+      min-width: 240px;
+    }
+    button {
+      background: #4f7fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    code {
+      background: rgba(255,255,255,.08);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>M3U8 Video.js HLS Player</h1>
+  <div class="player-box">
+    <video
+      id="video-player"
+      class="video-js vjs-big-play-centered"
+      controls
+      preload="auto"
+      playsinline
+      data-setup='{}'
+      style="width:100%; height:auto; border-radius:10px;"
+    >
+      <p class="vjs-no-js">
+        Enable JavaScript and use a modern browser to view the video.
+      </p>
+    </video>
+    <div class="note">
+      Source: <code id="source-label"></code>
+    </div>
+    <div class="controls">
+      <input id="src-input" placeholder="Paste .m3u8 URL here" />
+      <button id="load-btn">Load</button>
+      <button id="reload-btn">Reload</button>
+    </div>
+    <div id="error-box" aria-live="polite"></div>
+  </div>
+
+  <!-- Video.js -->
+  <script src="https://vjs.zencdn.net/8.0.0/video.min.js"></script>
+  <script>
+    // helper: get ?src= query param
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    const defaultManifest = 'http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8';
+    let currentManifest = getQueryParam('src') || defaultManifest;
+
+    document.getElementById('source-label').textContent = currentManifest;
+    document.getElementById('src-input').value = currentManifest;
+
+    const player = videojs('video-player', {
+      fluid: true,
+      liveui: true,
+      autoplay: false,
+      html5: {
+        hls: {
+          overrideNative: false // let Safari use native HLS
+        }
+      }
+    });
+
+    function setSource(url) {
+      currentManifest = url;
+      document.getElementById('source-label').textContent = url;
+      player.src({
+        src: url,
+        type: 'application/x-mpegURL'
+      });
+      player.play().catch(() => {});
+    }
+
+    document.getElementById('load-btn').addEventListener('click', () => {
+      const v = document.getElementById('src-input').value.trim();
+      if (v) {
+        setSource(v);
+        clearError();
+      }
+    });
+    document.getElementById('reload-btn').addEventListener('click', () => {
+      setSource(currentManifest);
+      clearError();
+    });
+
+    function showError(msg) {
+      const box = document.getElementById('error-box');
+      box.innerHTML = '';
+      const d = document.createElement('div');
+      d.className = 'error';
+      d.textContent = msg;
+      box.appendChild(d);
+    }
+    function clearError() {
+      document.getElementById('error-box').textContent = '';
+    }
+
+    player.on('error', () => {
+      const e = player.error();
+      showError(e && e.message ? `Playback error: ${e.message}` : 'Unknown error');
+      console.warn('Video.js error:', e);
+    });
+    player.on('loadedmetadata', () => {
+      clearError();
+    });
+
+    // initial load
+    setSource(currentManifest);
+  </script>
+</body>
+</html>
