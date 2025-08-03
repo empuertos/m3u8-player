@@ -1,25 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset=utf-8 />
-<title>24 TV CANLI YAYIN</title>
-  
-
-  <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
-  <script src="https://unpkg.com/video.js/dist/video.js"></script>
-  <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
-   
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player with Error Handling</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        video {
+            max-width: 100%;
+            border: 2px solid #333;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <video id="my_video_1" class="video-js vjs-fluid vjs-default-skin" controls preload="auto"
-  data-setup='{}'>
-    <source src="http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8" type="application/x-mpegURL">
-  </video>
-  
-<script>
-var player = videojs('my_video_1');
-player.play();
-</script>
-  
+
+    <video id="videoPlayer" controls>
+        <source src="http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8" type="application/x-mpegURL">
+        Your browser does not support the video tag.
+    </video>
+    <div class="error-message" id="errorMessage">An error occurred while trying to play the video. Please try again later.</div>
+
+    <script>
+        const videoPlayer = document.getElementById('videoPlayer');
+        const errorMessage = document.getElementById('errorMessage');
+
+        videoPlayer.addEventListener('error', function(event) {
+            // Handle the error
+            console.error('Video playback error:', event);
+            errorMessage.style.display = 'block';
+        });
+
+        videoPlayer.addEventListener('canplay', function() {
+            // Hide error message if video can play
+            errorMessage.style.display = 'none';
+        });
+    </script>
+
 </body>
 </html>
