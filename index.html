@@ -1,28 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8"/>
-    <title>M3U8 Player</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<meta charset=utf-8 />
+<title>24 TV CANLI YAYIN</title>
+  
+
+  <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+  <script src="https://unpkg.com/video.js/dist/video.js"></script>
+  <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
+   
 </head>
 <body>
-    <video id="video" controls>
-</video>
-
-    <script>
-        var video = document.getElementById('video');
-        var videoSrc = 'http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8'; // Replace with your M3U8 URL
-
-        if (Hls.isSupported()) {
-            var hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(video);
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Fallback for browsers that natively support HLS (e.g., Safari)
-            video.src = videoSrc;
-        } else {
-            alert('Your browser does not support HLS playback.');
-        }
-    </script>
+  <video id="my_video_1" class="video-js vjs-fluid vjs-default-skin" controls preload="auto"
+  data-setup='{}'>
+    <source src="http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8" type="application/x-mpegURL">
+  </video>
+  
+<script>
+var player = videojs('my_video_1');
+player.play();
+</script>
+  
 </body>
 </html>
