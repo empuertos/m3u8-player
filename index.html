@@ -1,458 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Attendance Tracker</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<style>
-  :root {
-    --bg:#f3f4f8;
-    --card:#fff;
-    --radius:12px;
-    --shadow:0 12px 30px -10px rgba(0,0,0,0.08);
-    --font-stack: system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
-    --accent:#6366f1;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family: var(--font-stack);
-    background: var(--bg);
-    color:#1f2d3a;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    padding:1rem;
-    gap:1rem;
-  }
-  .container{
-    max-width:1000px;
-    margin:0 auto;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    gap:1rem;
-  }
-  .top{
-    display:flex;
-    flex-wrap:wrap;
-    gap:0.75rem;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .card{
-    background: var(--card);
-    border-radius: var(--radius);
-    padding:1rem;
-    box-shadow: var(--shadow);
-    position:relative;
-  }
-  h1{
-    margin:0;
-    font-size:1.5rem;
-    display:flex;
-    align-items:center;
-    gap:0.5rem;
-  }
-  .small{
-    font-size:0.9rem;
-    color:#555;
-  }
-  .controls{
-    display:flex;
-    flex-wrap:wrap;
-    gap:0.5rem;
-    align-items:center;
-  }
-  button{
-    cursor:pointer;
-    border:none;
-    padding:0.55rem 1rem;
-    border-radius:8px;
-    background: var(--accent);
-    color:#fff;
-    font-weight:600;
-    font-size:0.9rem;
-    display:inline-flex;
-    align-items:center;
-    gap:4px;
-    transition:filter .15s;
-  }
-  button:hover{filter:brightness(1.1);}
-  button.secondary{
-    background:#e2e8f0;
-    color:#1f2d3a;
-  }
-  input, select{
-    padding:0.5rem 0.75rem;
-    border-radius:6px;
-    border:1px solid #d1d9e6;
-    font-size:0.9rem;
-  }
-  table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:0.85rem;
-    table-layout:auto;
-    overflow-x:auto;
-  }
-  th, td{
-    padding:6px 8px;
-    border:1px solid #e2e8f0;
-    text-align:left;
-    vertical-align:middle;
-    position:relative;
-  }
-  th{
-    background:#f9fafe;
-    font-weight:600;
-    white-space:nowrap;
-  }
-  td.name{
-    max-width:200px;
-    word-break:break-word;
-  }
-  .badge{
-    padding:4px 8px;
-    border-radius:999px;
-    font-size:0.65rem;
-    font-weight:600;
-    display:inline-block;
-  }
-  .present{background:#d1fae5;color:#065f46;}
-  .absent{background:#ffe4e6;color:#9b1c28;}
-  .late{background:#fff7c0;color:#735c0f;}
-  .excused{background:#e0f2fe;color:#0369a1;}
-  .legend{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:6px;
-  }
-  .student-row:hover{background:rgba(99,102,241,0.04);}
-  .flex{
-    display:flex;
-    gap:0.5rem;
-    flex-wrap:wrap;
-    align-items:center;
-  }
-  .date-picker{
-    display:flex;
-    gap:6px;
-    flex-wrap:wrap;
-    align-items:center;
-  }
-  .summary{
-    display:flex;
-    gap:1rem;
-    flex-wrap:wrap;
-    margin-top:4px;
-  }
-  .pill{
-    background:#eef2ff;
-    padding:6px 12px;
-    border-radius:999px;
-    font-size:0.8rem;
-    display:inline-block;
-  }
-  @media (max-width:900px){
-    th, td{font-size:0.75rem;}
-    h1{font-size:1.25rem;}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Attendance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .student-card {
+            transition: all 0.2s ease;
+        }
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <div class="top">
-        <div>
-          <h1>Attendance Tracker <span style="font-size:0.8rem;color:#555;">(per date)</span></h1>
-          <div class="small">Add students below, mark status, export for OBS or CSV.</div>
-        </div>
-        <div class="controls">
-          <div class="date-picker">
-            <label for="attendance-date">Date:</label>
-            <input type="date" id="attendance-date" />
-            <button id="prev-date" title="Previous date">&lt;</button>
-            <button id="next-date" title="Next date">&gt;</button>
-          </div>
-          <button id="add-student">+ Add Student</button>
-          <button class="secondary" id="export-csv">Export CSV</button>
-          <button class="secondary" id="export-obs">Export OBS Text</button>
-          <button class="secondary" id="clear-date">Clear This Date</button>
-        </div>
-      </div>
-      <div class="legend">
-        <div><span class="badge present">Present</span></div>
-        <div><span class="badge absent">Absent</span></div>
-        <div><span class="badge late">Late</span></div>
-        <div><span class="badge excused">Excused</span></div>
-      </div>
-    </div>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8 text-center">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/03ad965e-f14e-4444-b2c2-86d6abaa2080.png" alt="Modern classroom setting with students attending lecture in a bright environment, with digital screens showing attendance records" class="mx-auto rounded-lg shadow-md mb-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Class Attendance System</h1>
+            <p class="text-gray-600">Efficiently manage and track student attendance</p>
+        </header>
 
-    <div class="card" id="roster-card">
-      <div class="flex" style="justify-content:space-between; flex-wrap:wrap;">
-        <div><strong>Student Roster</strong></div>
-        <div class="small">Click status to cycle. Long names auto-fit.</div>
-      </div>
-      <div style="overflow:auto;">
-        <table id="attendance-table">
-          <thead>
-            <tr>
-              <th style="width:30px;">#</th>
-              <th style="min-width:180px;">Name</th>
-              <th style="width:120px;">Status</th>
-              <th style="width:60px;">Remove</th>
-            </tr>
-          </thead>
-          <tbody id="students-body">
-            <!-- populated dynamically -->
-          </tbody>
-        </table>
-      </div>
-      <div class="summary" id="summary-bar">
-        <!-- summary pills -->
-      </div>
-    </div>
+        <nav class="flex border-b border-gray-200 mb-8">
+            <button onclick="openTab('register-tab')" class="tab-button py-3 px-6 font-medium text-sm border-b-2 border-transparent hover:text-blue-600 hover:border-blue-200 transition-all focus:outline-none active">Register</button>
+            <button onclick="openTab('attendance-tab')" class="tab-button py-3 px-6 font-medium text-sm border-b-2 border-transparent hover:text-blue-600 hover:border-blue-200 transition-all focus:outline-none">Mark Attendance</button>
+            <button onclick="openTab('view-tab')" class="tab-button py-3 px-6 font-medium text-sm border-b-2 border-transparent hover:text-blue-600 hover:border-blue-200 transition-all focus:outline-none">View Records</button>
+        </nav>
 
-    <div class="card">
-      <div class="small"><strong>OBS-compatible Text Preview (for current date):</strong></div>
-      <pre id="obs-preview" style="background:#1f2d3a;color:#f5f7fa;padding:12px;border-radius:8px;overflow:auto;min-height:80px;font-size:0.8rem;"></pre>
-    </div>
-  </div>
-
-<script>
-  // --- Data model ---
-  const STORAGE_KEY = 'attendance_tracker_data_v1';
-  const state = {
-    date: new Date().toISOString().slice(0,10),
-    students: [], // {id, name}
-    attendance: {} // { date: { studentId: status } }
-  };
-  const STATUS = ['present','absent','late','excused'];
-  const STATUS_LABEL = {
-    present: 'Present',
-    absent: 'Absent',
-    late: 'Late',
-    excused: 'Excused'
-  };
-
-  // --- Utilities ---
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(raw) Object.assign(state, JSON.parse(raw));
-    } catch(e){
-      console.warn('load failed', e);
-    }
-  }
-  function saveState(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }
-  function getAttendanceForDate(d){
-    return state.attendance[d] || {};
-  }
-  function setAttendanceForDate(d, data){
-    state.attendance[d] = data;
-    saveState();
-  }
-  function createId(){ return 's_' + Math.random().toString(36).substring(2,9); }
-
-  // --- DOM refs ---
-  const dateInput = document.getElementById('attendance-date');
-  const studentsBody = document.getElementById('students-body');
-  const addStudentBtn = document.getElementById('add-student');
-  const exportCsvBtn = document.getElementById('export-csv');
-  const exportObsBtn = document.getElementById('export-obs');
-  const clearDateBtn = document.getElementById('clear-date');
-  const prevDateBtn = document.getElementById('prev-date');
-  const nextDateBtn = document.getElementById('next-date');
-  const summaryBar = document.getElementById('summary-bar');
-  const obsPreview = document.getElementById('obs-preview');
-
-  // --- Rendering ---
-  function render(){
-    dateInput.value = state.date;
-    renderStudentTable();
-    renderSummary();
-    renderObsText();
-  }
-
-  function renderStudentTable(){
-    studentsBody.innerHTML = '';
-    const attendanceForDate = getAttendanceForDate(state.date);
-    state.students.forEach((stu, idx)=>{
-      const tr = document.createElement('tr');
-      tr.classList.add('student-row');
-      const numTd = document.createElement('td');
-      numTd.textContent = idx + 1;
-      const nameTd = document.createElement('td');
-      nameTd.textContent = stu.name;
-      nameTd.classList.add('name');
-      nameTd.contentEditable = true;
-      nameTd.spellcheck = false;
-      nameTd.style.minWidth = '120px';
-      nameTd.addEventListener('input', ()=> {
-        stu.name = nameTd.textContent.trim();
-        saveState();
-        renderObsText();
-      });
-
-      const statusTd = document.createElement('td');
-      const current = attendanceForDate[stu.id] || 'absent';
-      const badge = document.createElement('span');
-      badge.className = 'badge ' + current;
-      badge.textContent = STATUS_LABEL[current];
-      badge.style.cursor = 'pointer';
-      badge.addEventListener('click', ()=>{
-        const curIndex = STATUS.indexOf(attendanceForDate[stu.id] || 'absent');
-        const nextStatus = STATUS[(curIndex + 1) % STATUS.length];
-        attendanceForDate[stu.id] = nextStatus;
-        setAttendanceForDate(state.date, attendanceForDate);
-        render();
-      });
-      statusTd.appendChild(badge);
-
-      const removeTd = document.createElement('td');
-      const del = document.createElement('button');
-      del.textContent = '✕';
-      del.style.padding = '4px 8px';
-      del.style.fontSize = '0.8rem';
-      del.style.background = '#f87171';
-      del.style.borderRadius = '6px';
-      del.addEventListener('click', ()=>{
-        if(!confirm(`Remove "${stu.name}"?`)) return;
-        state.students = state.students.filter(s=>s.id!==stu.id);
-        // also remove from attendance
-        Object.keys(state.attendance).forEach(d=>{
-          if(state.attendance[d][stu.id]) delete state.attendance[d][stu.id];
-        });
-        saveState();
-        render();
-      });
-      removeTd.appendChild(del);
-
-      tr.appendChild(numTd);
-      tr.appendChild(nameTd);
-      tr.appendChild(statusTd);
-      tr.appendChild(removeTd);
-      studentsBody.appendChild(tr);
-    });
-  }
-
-  function renderSummary(){
-    summaryBar.innerHTML = '';
-    const attendanceForDate = getAttendanceForDate(state.date);
-    let counts = {present:0, absent:0, late:0, excused:0};
-    state.students.forEach(s => {
-      const st = attendanceForDate[s.id] || 'absent';
-      if(counts[st] !== undefined) counts[st]++;
-    });
-    const total = state.students.length;
-    const presentPct = total? ((counts.present/total*100).toFixed(1())) : 0;
-    const summaryItems = [
-      {label:'Total', val: total},
-      {label:'Present', val: counts.present},
-      {label:'Absent', val: counts.absent},
-      {label:'Late', val: counts.late},
-      {label:'Excused', val: counts.excused},
-      {label:'Attendance %', val: total?((counts.present + counts.late)/total*100).toFixed(1)+'%':'0%'}
-    ];
-    summaryItems.forEach(it=>{
-      const div = document.createElement('div');
-      div.className = 'pill';
-      div.textContent = `${it.label}: ${it.val}`;
-      summaryBar.appendChild(div);
-    });
-  }
-
-  function renderObsText(){
-    const attendanceForDate = getAttendanceForDate(state.date);
-    const lines = [];
-    lines.push(`Date: ${state.date}`);
-    lines.push(`Total Students: ${state.students.length}`);
-    let present = 0, absent = 0, late = 0, excused = 0;
-    state.students.forEach(s=>{
-      const st = attendanceForDate[s.id] || 'absent';
-      if(st==='present') present++;
-      if(st==='absent') absent++;
-      if(st==='late') late++;
-      if(st==='excused') excused++;
-      lines.push(`${s.name} - ${STATUS_LABEL[st]}`);
-    });
-    lines.unshift(`Present: ${present} | Absent: ${absent} | Late: ${late} | Excused: ${excused}`);
-    obsPreview.textContent = lines.join('\n');
-  }
-
-  // --- Actions ---
-  addStudentBtn.addEventListener('click', ()=>{
-    const name = prompt('Student name:')?.trim();
-    if(!name) return;
-    state.students.push({id:createId(), name});
-    saveState();
-    render();
-  });
-
-  dateInput.addEventListener('change', ()=>{
-    state.date = dateInput.value;
-    if(!state.date) state.date = new Date().toISOString().slice(0,10);
-    render();
-  });
-
-  prevDateBtn.addEventListener('click', ()=>{
-    const d = new Date(state.date);
-    d.setDate(d.getDate() -1);
-    state.date = d.toISOString().slice(0,10);
-    render();
-  });
-  nextDateBtn.addEventListener('click', ()=>{
-    const d = new Date(state.date);
-    d.setDate(d.getDate() +1);
-    state.date = d.toISOString().slice(0,10);
-    render();
-  });
-
-  clearDateBtn.addEventListener('click', ()=>{
-    if(confirm('Clear all attendance marks for this date?')){
-      delete state.attendance[state.date];
-      saveState();
-      render();
-    }
-  });
-
-  exportCsvBtn.addEventListener('click', ()=>{
-    const attendanceForDate = getAttendanceForDate(state.date);
-    const headers = ['Name','Status'];
-    const rows = state.students.map(s=>[s.name, STATUS_LABEL[attendanceForDate[s.id] || 'absent']]);
-    let csv = headers.join(',') + '\n';
-    rows.forEach(r=> {
-      // escape quotes
-      const line = r.map(v => `"${v.replace(/"/g,'""')}"`).join(',');
-      csv += line + '\n';
-    });
-    downloadBlob(csv, `attendance_${state.date}.csv`, 'text/csv');
-  });
-
-  exportObsBtn.addEventListener('click', ()=>{
-    const text = obsPreview.textContent;
-    downloadBlob(text, `obs_attendance_${state.date}.txt`, 'text/plain');
-  });
-
-  function downloadBlob(content, filename, type){
-    const blob = new Blob([content], {type});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 5000);
-  }
-
-  // initialize
-  loadState();
-  if(!state.date) state.date = new Date().toISOString().slice(0,10);
-  render();
-
-  // optional: keyboard shortcut to add student: Ctrl+N
-  document.addEventListener('keydown',(e)=>{
-    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='n'){
+        <!-- Register Tab -->
+        <div id="register-tab" class="tab-content active">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Register New Student</h2>
+                <form id="registration-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input type="text" id="first-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue
