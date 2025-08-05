@@ -1,5 +1,105 @@
-<iframe height="300" style="width: 100%;" scrolling="no" title="may website backup" src="https://codepen.io/nosnevets/embed/JoYEJBL?default-tab=html&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
-  See the Pen <a href="https://codepen.io/nosnevets/pen/JoYEJBL">
-  may website backup</a> by stevenson (<a href="https://codepen.io/nosnevets">@nosnevets</a>)
-  on <a href="https://codepen.io">CodePen</a>.
-</iframe>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Steve's Live Page</title>
+  <style>
+ 
+    }
+    .clock, .weather {
+      font-size: 1.2em;
+      margin: 10px;
+    }
+    .dropdown, audio, iframe, .radar {
+      margin: 20px auto;
+      max-width: 90%;
+    }
+    select {
+      padding: 10px;
+      font-size: 16px;
+   }
+  </style>
+</script>
+
+<style>
+</style
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Lotto Results</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .lotto-frame {
+      width: 100%;
+      max-width: 600px;
+      height: 220px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #aaa;
+      margin: auto;
+    }
+
+    .lotto-frame iframe {
+      position: relative;
+      top: -1280px;
+      height: 1700px;
+      width: 100%;
+      border: 0;
+    }
+
+    .countdown {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h3>🎲 3D Lotto Results Today</h3>
+
+  <div class="lotto-frame">
+    <iframe 
+      id="lottoIframe"
+      src="https://www.lottopcso.com/swertres-result-today/" 
+      scrolling="no">
+    </iframe>
+  </div>
+
+  <div class="countdown">
+    ⏳ Refreshing in <span id="countdown">45</span> seconds...
+  </div>
+
+  <script>
+    const countdownElement = document.getElementById('countdown');
+    const iframe = document.getElementById('lottoIframe');
+    let secondsLeft = 45;
+
+    function updateCountdown() {
+      secondsLeft--;
+      countdownElement.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        // Reload iframe with cache-busting timestamp
+        const cleanSrc = iframe.src.split('?')[0];
+        iframe.src = cleanSrc + '?t=' + new Date().getTime();
+        secondsLeft = 45; // Reset countdown
+      }
+    }
+
+    // Run every second
+    setInterval(updateCountdown, 1000);
+  </script>
+
+</body>
+</html>
