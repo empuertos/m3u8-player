@@ -1,105 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Steve's Live Page</title>
-  <style>
- 
-    }
-    .clock, .weather {
-      font-size: 1.2em;
-      margin: 10px;
-    }
-    .dropdown, audio, iframe, .radar {
-      margin: 20px auto;
-      max-width: 90%;
-    }
-    select {
-      padding: 10px;
-      font-size: 16px;
-   }
-  </style>
-</script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philippines Weather Map</title>
 <style>
-</style
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>3D Lotto Results</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .lotto-frame {
-      width: 100%;
-      max-width: 600px;
-      height: 220px;
-      overflow: hidden;
-      position: relative;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #aaa;
-      margin: auto;
-    }
-
-    .lotto-frame iframe {
-      position: relative;
-      top: -1280px;
-      height: 1700px;
-      width: 100%;
-      border: 0;
-    }
-
-    .countdown {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
-    }
-  </style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    overflow-x: hidden;
+}
+#map-container {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    height: 0;
+    padding-bottom: 60%; /* maintain aspect ratio for map */
+    background: url('https://upload.wikimedia.org/wikipedia/commons/9/99/Map_of_the_Philippines.png') no-repeat center center;
+    background-size: contain;
+}
+.city {
+    position: absolute;
+    width: 12%;
+    min-width: 100px;
+    max-width: 150px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    background-color: rgba(51,51,51,0.9);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+.marker {
+    position: absolute;
+    width: 15%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    top: -10%;
+    left: -10%;
+    border: 2px solid #fff;
+    z-index: 0;
+}
+.city img {
+    width: 25%;
+    max-width: 40px;
+    height: auto;
+    margin-right: 5%;
+    z-index: 2;
+    position: relative;
+}
+.city-info {
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    position: relative;
+    font-size: 0.7em;
+}
+.city-name {
+    font-weight: bold;
+    color: #ffd700;
+}
+.temp {
+    color: #67e8f9;
+}
+.condition {
+    color: #ccc;
+    font-size: 0.9em;
+}
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+.drop {
+    position: absolute;
+    width: 0.5%;
+    height: 3%;
+    background: #67e8f9;
+    opacity: 0.6;
+    animation: fall 1s linear infinite;
+}
+@keyframes fall {
+    0% { transform: translateY(-10%); }
+    100% { transform: translateY(100%); }
+}
+.cloud {
+    position: absolute;
+    width: 20%;
+    height: 10%;
+    background: rgba(200,200,200,0.3);
+    border-radius: 50%;
+    top: 5%;
+    animation: cloudMove 6s linear infinite;
+}
+@keyframes cloudMove {
+    0% { left: -25%; }
+    100% { left: 100%; }
+}
+.sun-ray {
+    position: absolute;
+    width: 3%;
+    height: 10%;
+    background: #ffd700;
+    opacity: 0.7;
+    top: 5%;
+    left: 50%;
+    transform-origin: bottom center;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg) translateX(-50%) }
+    100% { transform: rotate(360deg) translateX(-50%) }
+}
+</style>
 </head>
 <body>
+<div id="map-container"></div>
+<script>
+const apiKey = "2bfa044af082bab4c373f17dc0b530da";
+const cities = [
+    { name: "Manila", id: 1701668, top: "25%", left: "50%", color:"#ff4d4d" },
+    { name: "Cebu City", id: 1717512, top: "60%", left: "55%", color:"#4dff4d" },
+    { name: "Talisay City Cebu", id: 1685218, top: "63%", left: "55%", color:"#4dffff" },
+    { name: "Cagayan de Oro", id: 1715348, top: "40%", left: "65%", color:"#ffff4d" },
+    { name: "Zamboanga", id: 1679432, top: "70%", left: "20%", color:"#ff4dff" },
+    { name: "Davao City", id: 1732924, top: "80%", left: "75%", color:"#ffb84d" }
+];
 
-  <h3>🎲 3D Lotto Results Today</h3>
-
-  <div class="lotto-frame">
-    <iframe 
-      id="lottoIframe"
-      src="https://www.lottopcso.com/swertres-result-today/" 
-      scrolling="no">
-    </iframe>
-  </div>
-
-  <div class="countdown">
-    ⏳ Refreshing in <span id="countdown">45</span> seconds...
-  </div>
-
-  <script>
-    const countdownElement = document.getElementById('countdown');
-    const iframe = document.getElementById('lottoIframe');
-    let secondsLeft = 45;
-
-    function updateCountdown() {
-      secondsLeft--;
-      countdownElement.textContent = secondsLeft;
-      if (secondsLeft <= 0) {
-        // Reload iframe with cache-busting timestamp
-        const cleanSrc = iframe.src.split('?')[0];
-        iframe.src = cleanSrc + '?t=' + new Date().getTime();
-        secondsLeft = 45; // Reset countdown
-      }
+function createRain(cityDiv, count=20){
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    for(let i=0;i<count;i++){
+        const drop = document.createElement('div');
+        drop.className = 'drop';
+        drop.style.left = Math.random()*100+'%';
+        drop.style.animationDelay = Math.random()+'s';
+        overlay.appendChild(drop);
     }
+    cityDiv.appendChild(overlay);
+}
 
-    // Run every second
-    setInterval(updateCountdown, 1000);
-  </script>
+function createClouds(cityDiv,count=3){
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    for(let i=0;i<count;i++){
+        const cloud = document.createElement('div');
+        cloud.className = 'cloud';
+        cloud.style.top = Math.random()*20+'%';
+        cloud.style.animationDuration = (4+Math.random()*4)+'s';
+        overlay.appendChild(cloud);
+    }
+    cityDiv.appendChild(overlay);
+}
 
+function createSunRays(cityDiv,count=8){
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    for(let i=0;i<count;i++){
+        const ray = document.createElement('div');
+        ray.className = 'sun-ray';
+        ray.style.transform = `rotate(${i*45}deg) translateX(-50%)`;
+        overlay.appendChild(ray);
+    }
+    cityDiv.appendChild(overlay);
+}
+
+async function fetchWeather() {
+    const container = document.getElementById("map-container");
+    container.innerHTML = "";
+    for(let city of cities){
+        try{
+            const url=`https://api.openweathermap.org/data/2.5/weather?id=${city.id}&appid=${apiKey}&units=metric`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            let conditionText = "";
+            let weatherMain = data.weather[0].main.toLowerCase();
+            const cityDiv = document.createElement('div');
+            cityDiv.className='city';
+            cityDiv.style.top = city.top;
+            cityDiv.style.left = city.left;
+
+            // Add colorful marker
+            const marker = document.createElement('div');
+            marker.className='marker';
+            marker.style.backgroundColor = city.color;
+            cityDiv.appendChild(marker);
+
+            cityDiv.innerHTML += `
+                <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="weather icon">
+                <div class="city-info">
+                    <div class="city-name">${city.name}</div>
+                    <div class="temp">${data.main.temp.toFixed(1)}°C</div>
+                    <div class="condition"></div>
+                </div>
+            `;
+            container.appendChild(cityDiv);
+
+            if(weatherMain.includes("rain")){
+                conditionText="Raining";
+                createRain(cityDiv,25);
+            } else if(weatherMain.includes("cloud")){
+                conditionText="Cloudy";
+                createClouds(cityDiv,3);
+            } else if(weatherMain.includes("clear")){
+                conditionText="Sunny";
+                createSunRays(cityDiv,8);
+            } else{
+                conditionText=data.weather[0].description;
+            }
+
+            cityDiv.querySelector('.condition').textContent=conditionText;
+
+        } catch(error){
+            const errorDiv=document.createElement('div');
+            errorDiv.className='city';
+            cityDiv.style.top = city.top;
+            cityDiv.style.left = city.left;
+            errorDiv.innerHTML=`<div class="city-info"><div class="city-name">${city.name}</div><div class="condition">Error loading data</div></div>`;
+            container.appendChild(errorDiv);
+        }
+    }
+}
+
+fetchWeather();
+setInterval(fetchWeather,10000);
+</script>
 </body>
 </html>
