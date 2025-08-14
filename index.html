@@ -124,12 +124,12 @@ body {
 <script>
 const apiKey = "2bfa044af082bab4c373f17dc0b530da";
 const cities = [
-    { name: "Manila", id: 1701668, top: "5%", color:"#ff4d4d" },
-    { name: "Talisay City Cebu", id: 1685218, top: "18%", color:"#4dffff" },
-    { name: "Cebu City", id: 1717512, top: "31%", color:"#4dff4d" },
-    { name: "Cagayan de Oro", id: 1715348, top: "44%", color:"#ffff4d" },
-    { name: "Zamboanga", id: 1679432, top: "57%", color:"#ff4dff" },
-    { name: "Davao City", id: 1732924, top: "70%", color:"#ffb84d" }
+    { name: "Manila", query: "Manila,PH", top: "5%", color:"#ff4d4d" },
+    { name: "Talisay City Cebu", query: "Talisay,Cebu,PH", top: "18%", color:"#4dffff" },
+    { name: "Cebu City", query: "Cebu City,PH", top: "31%", color:"#4dff4d" },
+    { name: "Cagayan de Oro", query: "Cagayan de Oro,PH", top: "44%", color:"#ffff4d" },
+    { name: "Zamboanga", query: "Zamboanga,PH", top: "57%", color:"#ff4dff" },
+    { name: "Davao City", query: "Davao City,PH", top: "70%", color:"#ffb84d" }
 ];
 
 function createRain(cityDiv, count=20){
@@ -185,7 +185,7 @@ async function fetchWeather() {
         cityDiv.appendChild(marker);
 
         try{
-            const url=`https://api.openweathermap.org/data/2.5/weather?id=${city.id}&appid=${apiKey}&units=metric`;
+            const url=`https://api.openweathermap.org/data/2.5/weather?q=${city.query}&appid=${apiKey}&units=metric`;
             const res = await fetch(url);
             const data = await res.json();
 
@@ -217,7 +217,6 @@ async function fetchWeather() {
             cityDiv.querySelector('.condition').textContent=conditionText;
 
         } catch(error){
-            // Fallback if API fails
             cityDiv.innerHTML += `
                 <div class="city-info">
                     <div class="city-name">${city.name}</div>
