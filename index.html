@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Philippines Weather Map</title>
+<title>Philippines Vertical Weather Map</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -17,19 +17,16 @@ body {
 #map-container {
     position: relative;
     width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
-    height: 0;
-    padding-bottom: 60%; /* maintain aspect ratio for map */
-    background: url('https://upload.wikimedia.org/wikipedia/commons/9/99/Map_of_the_Philippines.png') no-repeat center center;
-    background-size: contain;
+    max-width: 400px;
+    margin: 20px auto;
+    height: 100vh; /* full height to arrange vertically */
+    background-color: #1a1a1a;
 }
 .city {
     position: absolute;
-    width: 12%;
-    min-width: 100px;
-    max-width: 150px;
-    padding: 5px;
+    width: 90%;
+    left: 5%; /* center horizontally */
+    padding: 10px;
     display: flex;
     align-items: center;
     border-radius: 10px;
@@ -39,19 +36,18 @@ body {
 }
 .marker {
     position: absolute;
-    width: 15%;
-    aspect-ratio: 1;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    top: -10%;
-    left: -10%;
+    top: -10px;
+    left: -10px;
     border: 2px solid #fff;
     z-index: 0;
 }
 .city img {
-    width: 25%;
-    max-width: 40px;
-    height: auto;
-    margin-right: 5%;
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
     z-index: 2;
     position: relative;
 }
@@ -60,7 +56,6 @@ body {
     flex-direction: column;
     z-index: 2;
     position: relative;
-    font-size: 0.7em;
 }
 .city-name {
     font-weight: bold;
@@ -84,36 +79,36 @@ body {
 }
 .drop {
     position: absolute;
-    width: 0.5%;
-    height: 3%;
+    width: 2px;
+    height: 10px;
     background: #67e8f9;
     opacity: 0.6;
     animation: fall 1s linear infinite;
 }
 @keyframes fall {
-    0% { transform: translateY(-10%); }
+    0% { transform: translateY(-10px); }
     100% { transform: translateY(100%); }
 }
 .cloud {
     position: absolute;
-    width: 20%;
-    height: 10%;
+    width: 60px;
+    height: 30px;
     background: rgba(200,200,200,0.3);
     border-radius: 50%;
-    top: 5%;
+    top: 10px;
     animation: cloudMove 6s linear infinite;
 }
 @keyframes cloudMove {
-    0% { left: -25%; }
+    0% { left: -70px; }
     100% { left: 100%; }
 }
 .sun-ray {
     position: absolute;
-    width: 3%;
-    height: 10%;
+    width: 6px;
+    height: 20px;
     background: #ffd700;
     opacity: 0.7;
-    top: 5%;
+    top: 5px;
     left: 50%;
     transform-origin: bottom center;
     animation: spin 1s linear infinite;
@@ -129,12 +124,12 @@ body {
 <script>
 const apiKey = "2bfa044af082bab4c373f17dc0b530da";
 const cities = [
-    { name: "Manila", id: 1701668, top: "25%", left: "50%", color:"#ff4d4d" },
-    { name: "Cebu City", id: 1717512, top: "60%", left: "55%", color:"#4dff4d" },
-    { name: "Talisay City Cebu", id: 1685218, top: "63%", left: "55%", color:"#4dffff" },
-    { name: "Cagayan de Oro", id: 1715348, top: "40%", left: "65%", color:"#ffff4d" },
-    { name: "Zamboanga", id: 1679432, top: "70%", left: "20%", color:"#ff4dff" },
-    { name: "Davao City", id: 1732924, top: "80%", left: "75%", color:"#ffb84d" }
+    { name: "Manila", id: 1701668, top: "5%", color:"#ff4d4d" },
+    { name: "Talisay City Cebu", id: 1685218, top: "20%", color:"#4dffff" },
+    { name: "Cebu City", id: 1717512, top: "35%", color:"#4dff4d" },
+    { name: "Cagayan de Oro", id: 1715348, top: "50%", color:"#ffff4d" },
+    { name: "Zamboanga", id: 1679432, top: "65%", color:"#ff4dff" },
+    { name: "Davao City", id: 1732924, top: "80%", color:"#ffb84d" }
 ];
 
 function createRain(cityDiv, count=20){
@@ -156,7 +151,7 @@ function createClouds(cityDiv,count=3){
     for(let i=0;i<count;i++){
         const cloud = document.createElement('div');
         cloud.className = 'cloud';
-        cloud.style.top = Math.random()*20+'%';
+        cloud.style.top = Math.random()*20+'px';
         cloud.style.animationDuration = (4+Math.random()*4)+'s';
         overlay.appendChild(cloud);
     }
@@ -189,7 +184,6 @@ async function fetchWeather() {
             const cityDiv = document.createElement('div');
             cityDiv.className='city';
             cityDiv.style.top = city.top;
-            cityDiv.style.left = city.left;
 
             // Add colorful marker
             const marker = document.createElement('div');
@@ -226,7 +220,6 @@ async function fetchWeather() {
             const errorDiv=document.createElement('div');
             errorDiv.className='city';
             cityDiv.style.top = city.top;
-            cityDiv.style.left = city.left;
             errorDiv.innerHTML=`<div class="city-info"><div class="city-name">${city.name}</div><div class="condition">Error loading data</div></div>`;
             container.appendChild(errorDiv);
         }
