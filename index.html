@@ -338,13 +338,8 @@
         btn.classList.toggle('active', i === index);
       });
 
-      // Hide channel buttons when video is playing
-      document.getElementById('channelSelector').style.display = 'none';
-      
-      // Show channel buttons when video is clicked
-      iframe.addEventListener('click', () => {
-        document.getElementById('channelSelector').style.display = 'flex';
-      });
+      // Show channel buttons regardless of video status
+      document.getElementById('channelSelector').style.display = 'flex';
     }
 
     document.addEventListener('DOMContentLoaded', initializeChannels);
