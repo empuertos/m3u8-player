@@ -340,6 +340,8 @@
 
       // Hide channel buttons when video is playing
       document.getElementById('channelSelector').style.display = 'none';
+      
+      // Show channel buttons when video is clicked
       iframe.addEventListener('click', () => {
         document.getElementById('channelSelector').style.display = 'flex';
       });
