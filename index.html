@@ -1,1 +1,346 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Professional Philippines Live Stream Hub - Mobile Legends, Honor of Kings, MPL Philippines, News & Weather">
+  <title>Philippines Live Stream Hub v1.0</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-color: #ff0000;
+      --secondary-color: #1a1a1a;
+      --text-color: #ffffff;
+      --bg-color: #000000;
+      --card-bg: rgba(0, 0, 0, 0.8);
+      --border-color: #333333;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--secondary-color), #2a2a2a);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .title {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      font-weight: 700;
+      color: var(--text-color);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .channel-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      max-width: 100%;
+    }
+
+    .channel-btn {
+      background: var(--secondary-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .channel-btn:hover {
+      background: var(--border-color);
+      transform: translateY(-1px);
+    }
+
+    .channel-btn.active {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      box-shadow: 0 2px 8px rgba(255,0,0,0.3);
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .video-container {
+      flex: 1;
+      position: relative;
+      background: var(--secondary-color);
+      min-height: 300px;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 0.5rem;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: linear-gradient(135deg, var(--primary-color), #cc0000);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .channel-info {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      backdrop-filter: blur(10px);
+      max-width: 400px;
+    }
+
+    .channel-name {
+      font-weight: 700;
+      color: var(--primary-color);
+      font-size: clamp(1rem, 3vw, 1.25rem);
+      margin-bottom: 0.5rem;
+    }
+
+    .channel-description {
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      color: #ccc;
+      line-height: 1.4;
+    }
+
+    .error-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,0,0,0.9);
+      color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      display: none;
+      max-width: 90%;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .channel-selector {
+        justify-content: center;
+      }
+
+      .channel-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      .channel-info {
+        left: 0.5rem;
+        right: 0.5rem;
+        bottom: 0.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        padding: 0.75rem;
+      }
+
+      .title {
+        font-size: 1.1rem;
+      }
+
+      .status-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+      }
+    }
+
+    /* Landscape optimization */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .header {
+        padding: 0.5rem;
+      }
+
+      .channel-info {
+        bottom: 0.5rem;
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-content">
+        <h1 class="title">Philippines Live Stream Hub v1.0</h1>
+        <nav class="channel-selector" id="channelSelector">
+          <!-- Channels will be dynamically loaded -->
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="video-container">
+        <div class="status-badge">
+          <div class="status-dot"></div>
+          LIVE
+        </div>
+        <iframe 
+          id="videoFrame" 
+          src="" 
+          title="YouTube Live Channel" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+        </iframe>
+        
+        <div class="channel-info">
+          <div class="channel-name" id="channelName">Select a Channel</div>
+          <div class="channel-description" id="channelDescription">Choose from 26+ live streams</div>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+          <h3>Channel Not Available</h3>
+          <p>This channel may not be currently streaming or the ID is invalid.</p>
+          <p>Please try another channel.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const channels = [
+      { id: 'UCqmld-BIYME2i_ooRTo1EOg', name: 'Mobile Legends: Bang Bang', description: 'Official Mobile Legends: Bang Bang channel' },
+      { id: 'UCZw97VD3kb1SyAWjdBV8sRQ', name: 'Honor of Kings', description: 'Official Honor of Kings channel' },
+      { id: 'UC5ASeit2rM3taMSUChv9tNA', name: 'MPL Philippines', description: 'Mobile Legends Professional League Philippines' },
+      { id: 'UCcTiBX8js_djhSSlmJRI99A', name: 'DZRH News Television', description: 'Philippine news and current affairs' },
+      { id: 'UCpyLikj1x70S8UPxVqsPr6g', name: 'DOST-PAGASA Weather', description: 'Philippine weather and forecasts' },
+      { id: 'UCnf8Ejd3y2RboWNcOqHS24A', name: 'ATTY. RUPHIL F BAÑOC', description: 'Legal commentary and analysis' },
+      { id: 'UCPTddoHsUattFCXD8u4p7Eg', name: 'ATTY. JURIL BROKA PATIÑO', description: 'Legal insights and discussions' },
+      { id: 'UC1S4Kg8_N5-1Rp6miCKEpsQ', name: 'XFM Cebu 88.3', description: 'Cebu radio station - music and news' },
+      { id: 'UCstEtN0pgOmCf02EdXsGChw', name: 'KAPAMILYA CHANNEL', description: 'ABS-CBN entertainment and news' },
+      { id: 'UCKL5hAuzgFQsyrsQKgU0Qng', name: 'GMA NETWORK', description: 'Philippine news and entertainment' },
+      { id: 'UCiFx0kZFjR29u0uJxTSq5MQ', name: 'TV5 Philippines', description: 'News, sports, and entertainment' },
+      { id: 'UCJCUbMaY593_4SN1QPG7NFQ', name: 'PTV Philippines', description: 'Government news and programs' },
+      { id: 'UCIxIecbM8okv6hI7iqGJm2A', name: 'RMN NETWORK', description: 'Radio Mindanao Network news' },
+      { id: 'UCpOm2kv1upnIFoOT7rSp6hg', name: 'PCSO GOV', description: 'Philippine Charity Sweepstakes Office' },
+      { id: 'UCupvZG-5ko_eiXAupbDfxWw', name: 'CNN Philippines', description: 'Cable News Network Philippines' },
+      { id: 'UCDgW7mEUuVJuU-yRyZslrbw', name: 'ALL TV2', description: 'All TV Philippines - news and entertainment' },
+      { id: 'UC7941bBpZFenu_58hHnBkGQ', name: 'CCTN 47 OFFICIAL', description: 'Cebu Catholic Television Network' },
+      { id: 'UCeY0bbntWzzVIaj2zQigXg', name: 'NBC News', description: 'National Broadcasting Corporation' },
+      { id: 'UCYFgnkDYr-G5L_iy6DZdvSA', name: 'Super Radyo DZBB', description: 'GMA Super Radyo - news and public affairs' },
+      { id: 'UCs_VNu-FQ0WcJnD4QkmIL5w', name: 'DZMM Teleradyo', description: 'ABS-CBN DZMM - news and current affairs' },
+      { id: 'UCnYlMfpbCIg54cEyUiE42vw', name: 'NET25 News', description: 'Iglesia ni Cristo news network' },
+      { id: 'UCi-D5IxBR2HahDyfJfqy7jA', name: 'One PH', description: 'Cignal TV news and public affairs' },
+      { id: 'UCkw9o4FxDfJJiEHpq5JzDrQ', name: 'DYTR Bohol TV', description: 'Bohol regional news and programs' },
+      { id: 'UCVVw9u0pZ3nnWxx7WyE8YkQ', name: 'Bombo Radyo', description: 'News and public affairs radio network' },
+      { id: 'UCetMicrNjXa_Pev2pjl-Vjw', name: 'Leo Lastimosa', description: 'Cebuano journalist and commentator' },
+      { id: 'UCbxiLsJzOnnpDOZSwB5HWUQ', name: 'MPBL', description: 'Philippine basketball league' }
+    ];
+
+    let currentChannelIndex = 0;
+
+    function initializeChannels() {
+      const selector = document.getElementById('channelSelector');
+      
+      channels.forEach((channel, index) => {
+        const button = document.createElement('button');
+        button.className = 'channel-btn';
+        button.textContent = channel.name;
+        button.onclick = () => switchChannel(index);
+        selector.appendChild(button);
+      });
+
+      switchChannel(0);
+    }
+
+    function switchChannel(index) {
+      if (index < 0 || index >= channels.length) return;
+      
+      currentChannelIndex = index;
+      const channel = channels[index];
+      
+      document.getElementById('errorMessage').style.display = 'none';
+      
+      const iframe = document.getElementById('videoFrame');
+      iframe.src = `https://www.youtube.com/embed/live_stream?channel=${channel.id}&autoplay=1&mute=1`;
+      
+      document.getElementById('channelName').textContent = channel.name;
+      document.getElementById('channelDescription').textContent = channel.description;
+      
+      document.querySelectorAll('.channel-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeChannels);
+  </script>
+</body>
+</html>
