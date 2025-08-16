@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -248,7 +247,7 @@
     </header>
 
     <main class="main-content">
-      <div class="video-container">
+      <div class="video-container" id="videoContainer">
         <div class="status-badge">
           <div class="status-dot"></div>
           LIVE
@@ -337,6 +336,12 @@
       
       document.querySelectorAll('.channel-btn').forEach((btn, i) => {
         btn.classList.toggle('active', i === index);
+      });
+
+      // Hide channel buttons when video is playing
+      document.getElementById('channelSelector').style.display = 'none';
+      iframe.addEventListener('click', () => {
+        document.getElementById('channelSelector').style.display = 'flex';
       });
     }
 
