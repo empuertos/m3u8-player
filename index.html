@@ -1,32 +1,29 @@
-<script>
-const api = "https://noisy-frog-a9ab.st3v3.workers.dev"; 
-const target = "https://vidrock.net/movie/1038392";       
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M3U8 Player</title>
+  <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet">
+</head>
+<body>
+  <h2 style="text-align:center;">M3U8 Video Player</h2>
 
-async function loadVidrock() {
-  try {
-    const res = await fetch(`${api}/?url=${encodeURIComponent(target)}`);
-    const data = await res.json();
-    console.log("Worker response:", data);
+  <video id="my-video" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360"></video>
 
-    if (data.stream) {
-      videojs("player", {
-        sources: [{ src: data.stream, type: "application/x-mpegURL" }]
-      });
-    } else {
-      // escape HTML so it shows as text
-      const safe = (data.preview || data.error || "")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-      document.body.innerHTML += `
-        <pre style="white-space: pre-wrap; max-height: 400px; overflow:auto; background:#eee; padding:10px; font-size:12px;">
-${safe}
-        </pre>
-      `;
+  <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <script>
+    var video = document.getElementById('my-video');
+    if (Hls.isSupported()) {
+      var hls = new Hls();
+      // Replace with your .m3u8 link
+      hls.loadSource("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
     }
-  } catch (e) {
-    document.body.innerHTML += `<p>❌ Fetch failed: ${e.message}</p>`;
-  }
-}
-
-loadVidrock();
-</script>
+  </script>
+</body>
+</html>
