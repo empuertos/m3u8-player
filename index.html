@@ -1,36 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Vidrock Player</title>
-  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-</head>
-<body>
-  <video id="player" class="video-js vjs-default-skin" controls autoplay width="640" height="360"></video>
+<script>
+const api = "https://noisy-frog-a9ab.st3v3.workers.dev"; 
+const target = "https://vidrock.net/movie/1038392";       
 
-  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-  <script>
-    const api = "https://noisy-frog-a9ab.st3v3.workers.dev"; // your Worker
-    const target = "https://vidrock.net/movie/1038392";       // vidrock page
+async function loadVidrock() {
+  try {
+    const res = await fetch(`${api}/?url=${encodeURIComponent(target)}`);
+    const data = await res.json();
+    console.log("Worker response:", data);
 
-    async function loadVidrock() {
-      try {
-        const res = await fetch(`${api}/?url=${encodeURIComponent(target)}`);
-        const data = await res.json();
-        console.log("Worker response:", data);
-
-        if (data.stream) {
-          videojs("player", {
-            sources: [{ src: data.stream, type: "application/x-mpegURL" }]
-          });
-        } else {
-          document.body.innerHTML += `<p>❌ Error: ${data.error}</p>`;
-        }
-      } catch (e) {
-        document.body.innerHTML += `<p>❌ Fetch failed: ${e.message}</p>`;
-      }
+    if (data.stream) {
+      videojs("player", {
+        sources: [{ src: data.stream, type: "application/x-mpegURL" }]
+      });
+    } else {
+      document.body.innerHTML += `
+        <pre style="white-space: pre-wrap; max-height: 400px; overflow:auto; background:#eee; padding:10px;">
+${data.preview || data.error}
+        </pre>
+      `;
     }
+  } catch (e) {
+    document.body.innerHTML += `<p>❌ Fetch failed: ${e.message}</p>`;
+  }
+}
 
-    loadVidrock();
-  </script>
-</body>
-</html>
+loadVidrock();
+</script>
