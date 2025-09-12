@@ -13,9 +13,13 @@ async function loadVidrock() {
         sources: [{ src: data.stream, type: "application/x-mpegURL" }]
       });
     } else {
+      // escape HTML so it shows as text
+      const safe = (data.preview || data.error || "")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
       document.body.innerHTML += `
-        <pre style="white-space: pre-wrap; max-height: 400px; overflow:auto; background:#eee; padding:10px;">
-${data.preview || data.error}
+        <pre style="white-space: pre-wrap; max-height: 400px; overflow:auto; background:#eee; padding:10px; font-size:12px;">
+${safe}
         </pre>
       `;
     }
