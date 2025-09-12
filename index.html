@@ -1,1 +1,17 @@
+<video id="player" class="video-js" controls autoplay width="640" height="360"></video>
+<script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+<script>
+async function loadVidrock() {
+  const res = await fetch("https://YOUR_WORKER_URL/?url=https://vidrock.net/movie/1038392");
+  const data = await res.json();
+  if (data.stream) {
+    videojs("player", {
+      sources: [{ src: data.stream, type: "application/x-mpegURL" }]
+    });
+  } else {
+    alert("Stream not found: " + data.error);
+  }
+}
+loadVidrock();
+</script>
 
