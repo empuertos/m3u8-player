@@ -1,17 +1,52 @@
-<video id="player" class="video-js" controls autoplay width="640" height="360"></video>
-<script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
-<script>
-async function loadVidrock() {
-  const res = await fetch("https://noisy-frog-a9ab.st3v3.workers.dev///?url=https://vidrock.net/movie/1038392");
-  const data = await res.json();
-  if (data.stream) {
-    videojs("player", {
-      sources: [{ src: data.stream, type: "application/x-mpegURL" }]
-    });
-  } else {
-    alert("Stream not found: " + data.error);
-  }
-}
-loadVidrock();
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vidrock Player</title>
+  <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    video {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vidrock Player</h1>
+  <p>Playing Vidrock via Video.js + Cloudflare Worker</p>
 
+  <video id="player" class="video-js vjs-default-skin" controls preload="auto" width="720" height="400"></video>
+
+  <script>
+  async function loadVidrock() {
+    // CHANGE this to your Cloudflare Worker URL
+    const api = "https://m3u8-player.noisy-frog-a9ab.st3v3.workers.dev";
+    const target = "https://vidrock.net/movie/1038392";
+
+    try {
+      const res = await fetch(`${api}/?url=${encodeURIComponent(target)}`);
+      const data = await res.json();
+
+      if (data.stream) {
+        videojs("player", {
+          sources: [{ src: data.stream, type: "application/x-mpegURL" }]
+        });
+      } else {
+        document.body.innerHTML += "<p>❌ Error: " + data.error + "</p>";
+      }
+    } catch (err) {
+      document.body.innerHTML += "<p>❌ Failed: " + err.message + "</p>";
+    }
+  }
+  loadVidrock();
+  </script>
+</body>
+</html>
