@@ -47,10 +47,19 @@
   <div class="quake-list" id="quakeList">Loading...</div>
 
   <script>
+    let lastDataJSON = null;
+
     async function loadEarthquakes() {
       try {
         const res = await fetch("https://phivolcs-worker.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev/json"); // replace with your Worker URL
         const data = await res.json();
+
+        const currentDataJSON = JSON.stringify(data);
+        if (currentDataJSON === lastDataJSON) {
+          // No new updates, do nothing
+          return;
+        }
+        lastDataJSON = currentDataJSON;
 
         if (data.length === 0) {
           document.getElementById("quakeList").innerHTML = "No earthquake updates available.";
