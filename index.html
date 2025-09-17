@@ -54,6 +54,8 @@
         const res = await fetch("https://phivolcs-worker.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev/json"); // replace with your Worker URL
         const data = await res.json();
 
+        console.log("Fetched earthquake data:", data);
+
         const currentDataJSON = JSON.stringify(data);
         if (currentDataJSON === lastDataJSON) {
           // No new updates, do nothing
