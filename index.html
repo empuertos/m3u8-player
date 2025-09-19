@@ -22,13 +22,13 @@
     <tbody></tbody>
   </table>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
-    // ✅ Use CSV export link with PapaParse
+    // Workaround for CORS issue: Use a proxy server to fetch the CSV data
+    const proxyURL = "https://cors-anywhere.herokuapp.com/";
     const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTg-2HcEF2uQoTIfI6U0rem5f_Qd7aKE5kIde2MB9Q66C8FAU2y_fOK3sOBKSWQg1Ora0CEs8gMjjD_/export?format=csv&gid=0";
 
     function loadLatestEarthquakes() {
-      Papa.parse(sheetURL + "&t=" + new Date().getTime(), {
+      Papa.parse(proxyURL + sheetURL + "&t=" + new Date().getTime(), {
         download: true,
         complete: function(results) {
           let data = results.data;
