@@ -29,7 +29,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
     // Google Sheets CSV export URL
-    const sheetURL = "https://docs.google.com/spreadsheets/d/18JZtI9qRvAE5PnfTNbeCGDP8qPfYMatv5BJd_o5hesI/export?format=csv&gid=0";
+-    const sheetURL = "https://docs.google.com/spreadsheets/d/18JZtI9qRvAE5PnfTNbeCGDP8qPfYMatv5BJd_o5hesI/export?format=csv&gid=0";
++    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTg-2HcEF2uQoTIfI6U0rem5f_Qd7aKE5kIde2MB9Q66C8FAU2y_fOK3sOBKSWQg1Ora0CEs8gMjjD_/pub?output=csv&gid=0";
+
 
     function loadLatestEarthquakes() {
       let messageDiv = document.getElementById("message");
@@ -46,10 +48,10 @@
           // Take only first 10 data rows (skip header)
           let validRows = 0;
           data.slice(1, 11).forEach(row => {
-            if (row.length < 7) return;
+            if (row.length < 3) return;
             let dateTime = row[0];   // Column A
-            let magnitude = row[4];  // Column E
-            let location = row[6];   // Column G
+            let magnitude = row[1];  // Adjusted to Column B if needed
+            let location = row[2];   // Adjusted to Column C if needed
 
             let tr = document.createElement("tr");
             tr.innerHTML = `<td>${dateTime}</td><td>${magnitude}</td><td>${location}</td>`;
