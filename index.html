@@ -25,18 +25,15 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
-    // Due to CORS restrictions, the best approach is to download the CSV manually and parse it locally.
-    // Alternatively, you can publish the sheet as CSV and fetch it from a server that supports CORS or use a backend proxy.
-
-    // For now, let's update the script to fetch the CSV directly and parse it with PapaParse, but this will only work if CORS is allowed.
-
+    // Using a public CORS proxy to bypass CORS restrictions for the Google Sheets CSV export
+    const corsProxy = "https://cors-anywhere.herokuapp.com/";
     const sheetURL = "https://docs.google.com/spreadsheets/d/18JZtI9qRvAE5PnfTNbeCGDP8qPfYMatv5BJd_o5hesI/export?format=csv&gid=0";
 
     function loadLatestEarthquakes() {
       let messageDiv = document.getElementById("message");
       messageDiv.textContent = ""; // Clear previous messages
 
-      Papa.parse(sheetURL + "&t=" + new Date().getTime(), {
+      Papa.parse(corsProxy + sheetURL + "&t=" + new Date().getTime(), {
         download: true,
         complete: function(results) {
           let data = results.data;
