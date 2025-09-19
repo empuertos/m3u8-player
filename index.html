@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Latest 10 Earthquakes</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#000; color:#0f0; padding: 20px; }
-    h2 { margin-bottom: 10px; }
-    table { border-collapse: collapse; margin-top: 10px; width: 100%; }
+    body { font-family: Arial, sans-serif; background:#000; color:#0f0; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
     th, td { border: 1px solid #0f0; padding: 8px 12px; text-align: left; }
     th { background: #111; }
-    tbody tr:nth-child(odd) { background: #001100; }
   </style>
 </head>
 <body>
@@ -23,100 +19,38 @@
         <th>Location</th>
       </tr>
     </thead>
-    <tbody><tr><td colspan="3">Loading data...</td></tr></tbody>
+    <tbody></tbody>
   </table>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
-    // CSV export link from Google Sheets
+    // ✅ Use CSV export link with PapaParse
     const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTg-2HcEF2uQoTIfI6U0rem5f_Qd7aKE5kIde2MB9Q66C8FAU2y_fOK3sOBKSWQg1Ora0CEs8gMjjD_/export?format=csv&gid=0";
 
     function loadLatestEarthquakes() {
-      // NOTE: Due to CORS restrictions, fetching Google Sheets CSV directly from client-side may fail.
-      // To avoid CORS issues, run this page on a local server (e.g., VSCode Live Server extension).
-      // Alternatively, use a CORS proxy, but some proxies may return HTML or JS instead of CSV.
-      // For simplicity, this code fetches the CSV URL directly without proxy.
-
-      const fetchUrl = sheetURL + "&t=" + new Date().getTime();
-
-      fetch(fetchUrl)
-        .then(response => {
-          if (!response.ok) throw new Error("Network response was not ok");
-          return response.text();
-        })
-        .then(data => {
-          console.log("Raw fetched data:", data); // Debug log raw data
-
-          // Simple CSV parsing that handles quoted fields with commas
-          function parseCSV(text) {
-            const lines = [];
-            let currentLine = [];
-            let currentValue = '';
-            let inQuotes = false;
-
-            for (let i = 0; i < text.length; i++) {
-              const char = text[i];
-              const nextChar = text[i + 1];
-
-              if (char === '"' && inQuotes && nextChar === '"') {
-                currentValue += '"'; // Escaped quote
-                i++;
-              } else if (char === '"') {
-                inQuotes = !inQuotes;
-              } else if (char === ',' && !inQuotes) {
-                currentLine.push(currentValue);
-                currentValue = '';
-              } else if ((char === '\n' || char === '\r') && !inQuotes) {
-                if (char === '\r' && nextChar === '\n') {
-                  i++;
-                }
-                currentLine.push(currentValue);
-                lines.push(currentLine);
-                currentLine = [];
-                currentValue = '';
-              } else {
-                currentValue += char;
-              }
-            }
-            // Add last value if any
-            if (currentValue.length > 0 || currentLine.length > 0) {
-              currentLine.push(currentValue);
-              lines.push(currentLine);
-            }
-            return lines;
-          }
-
-          let rows = parseCSV(data);
+      Papa.parse(sheetURL + "&t=" + new Date().getTime(), {
+        download: true,
+        complete: function(results) {
+          let data = results.data;
           let tbody = document.querySelector("#eq-table tbody");
           tbody.innerHTML = ""; // clear old data
 
-          // Check if header row exists and data rows are enough
-          if (rows.length < 2) {
-            tbody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
-            return;
-          }
-
           // Take only first 10 data rows (skip header)
-          rows.slice(1, 11).forEach(row => {
-            // Defensive check for row length
+          data.slice(1, 11).forEach(row => {
             if (row.length < 7) return;
-
-            let dateTime = row[0].trim();   // Column A
-            let magnitude = row[4].trim();  // Column E
-            let location = row[6].trim();   // Column G
-
-            // Optional: Format date-time string if needed
-            // For now, display as is
+            let dateTime = row[0];   // Column A
+            let magnitude = row[4];  // Column E
+            let location = row[6];   // Column G
 
             let tr = document.createElement("tr");
             tr.innerHTML = `<td>${dateTime}</td><td>${magnitude}</td><td>${location}</td>`;
             tbody.appendChild(tr);
           });
-        })
-        .catch(err => {
+        },
+        error: function(err) {
           console.error("Error loading sheet:", err);
-          let tbody = document.querySelector("#eq-table tbody");
-          tbody.innerHTML = '<tr><td colspan="3">Failed to load data.</td></tr>';
-        });
+        }
+      });
     }
 
     // Load immediately
