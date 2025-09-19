@@ -22,25 +22,23 @@
     <tbody></tbody>
   </table>
 
+  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.6.0/src/tabletop.min.js"></script>
   <script>
-    // Workaround for CORS issue: Use a proxy server to fetch the CSV data
-    const proxyURL = "https://cors-anywhere.herokuapp.com/";
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTg-2HcEF2uQoTIfI6U0rem5f_Qd7aKE5kIde2MB9Q66C8FAU2y_fOK3sOBKSWQg1Ora0CEs8gMjjD_/export?format=csv&gid=0";
+    const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTg-2HcEF2uQoTIfI6U0rem5f_Qd7aKE5kIde2MB9Q66C8FAU2y_fOK3sOBKSWQg1Ora0CEs8gMjjD_/pubhtml';
 
     function loadLatestEarthquakes() {
-      Papa.parse(proxyURL + sheetURL + "&t=" + new Date().getTime(), {
-        download: true,
-        complete: function(results) {
-          let data = results.data;
+      Tabletop.init({
+        key: publicSpreadsheetUrl,
+        simpleSheet: true,
+        callback: function(data, tabletop) {
           let tbody = document.querySelector("#eq-table tbody");
           tbody.innerHTML = ""; // clear old data
 
-          // Take only first 10 data rows (skip header)
-          data.slice(1, 11).forEach(row => {
-            if (row.length < 7) return;
-            let dateTime = row[0];   // Column A
-            let magnitude = row[4];  // Column E
-            let location = row[6];   // Column G
+          // Take only first 10 data rows
+          data.slice(0, 10).forEach(row => {
+            let dateTime = row['Date-Time'] || row['date-time'] || row['date_time'] || row['DateTime'];
+            let magnitude = row['Magnitude'] || row['magnitude'];
+            let location = row['Location'] || row['location'];
 
             let tr = document.createElement("tr");
             tr.innerHTML = `<td>${dateTime}</td><td>${magnitude}</td><td>${location}</td>`;
