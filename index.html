@@ -48,6 +48,7 @@
           // Take only first 10 data rows (skip header)
           let validRows = 0;
           data.slice(1, 11).forEach(row => {
+            console.log("Row data:", row); // Log each row for debugging
             if (row.length < 3) return;
             let dateTime = row[0];   // Column A
             let magnitude = row[1];  // Adjusted to Column B if needed
