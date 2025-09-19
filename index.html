@@ -21,6 +21,7 @@
     </thead>
     <tbody></tbody>
   </table>
+  <div id="message" style="margin-top: 20px; color: #ff0;"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
@@ -32,6 +33,9 @@
     const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTg-2HcEF2uQoTIfI6U0rem5f_Qd7aKE5kIde2MB9Q66C8FAU2y_fOK3sOBKSWQg1Ora0CEs8gMjjD_/export?format=csv&gid=0";
 
     function loadLatestEarthquakes() {
+      let messageDiv = document.getElementById("message");
+      messageDiv.textContent = ""; // Clear previous messages
+
       Papa.parse(sheetURL + "&t=" + new Date().getTime(), {
         download: true,
         complete: function(results) {
@@ -41,6 +45,7 @@
           tbody.innerHTML = ""; // clear old data
 
           // Take only first 10 data rows (skip header)
+          let validRows = 0;
           data.slice(1, 11).forEach(row => {
             if (row.length < 7) return;
             let dateTime = row[0];   // Column A
@@ -50,10 +55,16 @@
             let tr = document.createElement("tr");
             tr.innerHTML = `<td>${dateTime}</td><td>${magnitude}</td><td>${location}</td>`;
             tbody.appendChild(tr);
+            validRows++;
           });
+
+          if (validRows === 0) {
+            messageDiv.textContent = "No data available or data format issue.";
+          }
         },
         error: function(err) {
           console.error("Error loading sheet:", err);
+          messageDiv.textContent = "Failed to load data. Check console for details.";
         }
       });
     }
