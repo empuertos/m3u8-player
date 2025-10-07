@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "title": "Avengers: Endgame",
+    "category": "Action",
+    "iframe": "https://autoembed.pro/player?url=https://example.com/avengers"
+  },
+  {
+    "id": 2,
+    "title": "The Hangover",
+    "category": "Comedy",
+    "iframe": "https://autoembed.pro/player?url=https://example.com/hangover"
+  },
+  {
+    "id": 3,
+    "title": "Titanic",
+    "category": "Drama",
+    "iframe": "https://autoembed.pro/player?url=https://example.com/titanic"
+  }
+]
