@@ -1,121 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎬 My Movie Library</title>
-<style>
-  body {
-    font-family: "Segoe UI", sans-serif;
-    background-color: #0e0e0e;
-    color: #fff;
-    text-align: center;
-    padding: 20px;
-  }
-
-  h1 { color: #ff4d4d; }
-
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  input, select {
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-    outline: none;
-  }
-
-  select {
-    width: 250px;
-  }
-
-  iframe {
-    width: 90%;
-    max-width: 900px;
-    height: 500px;
-    border: none;
-    border-radius: 10px;
-    margin-top: 20px;
-    box-shadow: 0 0 20px #222;
-  }
-
-  @media (max-width: 600px) {
-    iframe { height: 300px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>24K Movie Library</title>
 </head>
 <body>
+  <h1>🎬 24K Movie Library</h1>
+  <input type="number" id="movieNumber" placeholder="Enter movie number (1-24000)">
+  <button onclick="loadMovie()">Play</button>
 
-<h1>🎥 My Movie Library</h1>
+  <div id="player"></div>
 
-<div class="controls">
-  <input type="text" id="search" placeholder="Search movie title...">
-  <select id="category">
-    <option value="All">All Categories</option>
-  </select>
-  <select id="movieSelect">
-    <option value="">-- Select Movie --</option>
-  </select>
-</div>
+  <script>
+    async function loadMovie() {
+      const id = document.getElementById('movieNumber').value;
+      const res = await fetch('movies.json');
+      const movies = await res.json();
+      const movie = movies.find(m => m.id == id);
 
-<div id="player"></div>
-
-<script>
-let movies = [];
-
-fetch('movies.json')
-  .then(res => res.json())
-  .then(data => {
-    movies = data;
-    loadCategories();
-    populateDropdown(movies);
-  })
-  .catch(err => console.error('Error loading movies:', err));
-
-function loadCategories() {
-  const categories = ["All", ...new Set(movies.map(m => m.category))];
-  const catSelect = document.getElementById("category");
-  catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
-}
-
-function populateDropdown(list) {
-  const select = document.getElementById("movieSelect");
-  select.innerHTML = `<option value="">-- Select Movie --</option>`;
-  list.forEach(m => {
-    const opt = document.createElement("option");
-    opt.value = m.id;
-    opt.textContent = `${m.id}. ${m.title}`;
-    select.appendChild(opt);
-  });
-}
-
-document.getElementById("movieSelect").addEventListener("change", e => {
-  const movie = movies.find(m => m.id == e.target.value);
-  if (movie) {
-    document.getElementById("player").innerHTML =
-      `<iframe src="${movie.iframe}" allowfullscreen></iframe>`;
-  }
-});
-
-document.getElementById("search").addEventListener("input", filterMovies);
-document.getElementById("category").addEventListener("change", filterMovies);
-
-function filterMovies() {
-  const term = document.getElementById("search").value.toLowerCase();
-  const cat = document.getElementById("category").value;
-  const filtered = movies.filter(m =>
-    m.title.toLowerCase().includes(term) &&
-    (cat === "All" || m.category === cat)
-  );
-  populateDropdown(filtered);
-}
-</script>
-
+      const player = document.getElementById('player');
+      if (movie) {
+        player.innerHTML = `<iframe src="${movie.iframe}" width="100%" height="480" allowfullscreen></iframe>`;
+      } else {
+        player.innerHTML = "<p>Movie not found!</p>";
+      }
+    }
+  </script>
 </body>
 </html>
