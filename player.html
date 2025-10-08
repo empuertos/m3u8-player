@@ -104,7 +104,7 @@
                 <!-- Source Selector Dropdown Container -->
                 <div id="source-selector-container" class="relative">
                     <button id="braflix-button" class="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-lg px-3 py-1 flex items-center shadow-lg cursor-pointer transition duration-150 ease-in-out hover:bg-gray-700" onclick="toggleDropdown()">
-                        <span class="text-white text-sm font-semibold mr-1" id="current-source-name">AutoEmbed Pro</span>
+                        <span class="text-white text-sm font-semibold mr-1" id="current-source-name">My Worker</span>
                         <!-- Dropdown indicator (Rotates when open) -->
                         <svg id="dropdown-icon" class="w-4 h-4 text-white transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
@@ -114,13 +114,8 @@
                         <ul class="py-1 text-sm text-gray-200">
                             <!-- Selected Source -->
                             <li class="px-4 py-2 bg-red-600 font-bold text-white cursor-default">
-                                <span class="mr-2">✓</span> AutoEmbed Pro
+                                <span class="mr-2">✓</span> My Worker
                             </li>
-                            <!-- Other Sources -->
-                            <li class="px-4 py-2 hover:bg-gray-700 cursor-pointer" onclick="selectSource('VidSrc Me')">VidSrc Me</li>
-                            <li class="px-4 py-2 hover:bg-gray-700 cursor-pointer" onclick="selectSource('EmbedSoap')">EmbedSoap</li>
-                            <li class="px-4 py-2 hover:bg-gray-700 cursor-pointer" onclick="selectSource('2Embed')">2Embed</li>
-                            <li class="px-4 py-2 hover:bg-gray-700 cursor-pointer" onclick="selectSource('Smashy Stream')">Smashy Stream</li>
                         </ul>
                     </div>
                 </div>
@@ -182,18 +177,14 @@
         const iframe = document.getElementById('video-iframe');
         const tvInputs = document.getElementById('tv-inputs');
 
-        let currentProvider = 'https://autoembed.pro/embed/';
+        let currentProvider = 'https://movies.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev/';
         let type = '';
         let id = '';
         let season = 1;
         let episode = 1;
 
         const providers = {
-            'AutoEmbed Pro': 'https://autoembed.pro/embed/',
-            'VidSrc Me': 'https://vidsrc.me/embed/',
-            'EmbedSoap': 'https://embedsoap.com/embed/',
-            '2Embed': 'https://www.2embed.cc/embed/',
-            'Smashy Stream': 'https://player.smashy.stream/'
+            'My Worker': 'https://movies.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev/'
         };
 
         function getParams() {
