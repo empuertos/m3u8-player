@@ -112,13 +112,15 @@
         async function loadMovies() {
             const response = await fetch('movie.json');
             if (!response.ok) throw new Error('Failed to load movies');
-            movies = await response.json();
+            const data = await response.json();
+            movies = data.map(item => ({ ...item, id: item.tmdb, name: item.title }));
         }
 
         async function loadTV() {
             const response = await fetch('tv.json');
             if (!response.ok) throw new Error('Failed to load TV shows');
-            tvShows = await response.json();
+            const data = await response.json();
+            tvShows = data.map(item => ({ ...item, id: item.tmdb, name: item.title }));
         }
 
         async function loadData() {
