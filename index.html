@@ -108,20 +108,17 @@
         let currentType = 'movie';
         let currentList = [];
 
-        const workerUrl = 'https://movies.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev';
 
         async function loadMovies() {
-            const response = await fetch(`${workerUrl}/movie/popular`);
+            const response = await fetch('movie.json');
             if (!response.ok) throw new Error('Failed to load movies');
-            const data = await response.json();
-            movies = data.results || [];
+            movies = await response.json();
         }
 
         async function loadTV() {
-            const response = await fetch(`${workerUrl}/tv/popular`);
+            const response = await fetch('tv.json');
             if (!response.ok) throw new Error('Failed to load TV shows');
-            const data = await response.json();
-            tvShows = data.results || [];
+            tvShows = await response.json();
         }
 
         async function loadData() {
