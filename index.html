@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Website</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .nav {
+            margin-bottom: 20px;
+        }
+        .nav button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .nav button.active {
+            background-color: #0056b3;
+        }
+        .search {
+            margin-bottom: 20px;
+        }
+        .search input {
+            width: 300px;
+            padding: 10px;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .movie-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .movie-card:hover {
+            transform: scale(1.05);
+        }
+        .movie-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        .movie-card h3 {
+            padding: 10px;
+            margin: 0;
+            font-size: 16px;
+        }
+        .poster-container {
+            position: relative;
+        }
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2.5em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            padding: 15px;
+            pointer-events: none;
+        }
+        .movie-card:hover .play-icon {
+            opacity: 1;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie Website</h1>
+    <div class="nav">
+        <button id="moviesBtn" class="active">Movies</button>
+        <button id="tvBtn">TV Shows</button>
+    </div>
+    <div class="search">
+        <input type="text" id="searchInput" placeholder="Search movies...">
+    </div>
+    <div id="loading" class="loading" style="display: none;">Loading movies and TV shows...</div>
+    <div id="error" class="loading" style="display: none; color: red;">Failed to load data. Please try again later.</div>
+    <div id="content">
+        <div class="movie-grid" id="movieGrid"></div>
+    </div>
+
+    <script>
+        let movies = [];
+        let tvShows = [];
+        let currentType = 'movie';
+        let currentList = [];
+
+        const workerUrl = 'https://movies.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev';
+
+        async function loadMovies() {
+            const response = await fetch(`${workerUrl}/movie/popular`);
+            if (!response.ok) throw new Error('Failed to load movies');
+            const data = await response.json();
+            movies = data.results || [];
+        }
+
+        async function loadTV() {
+            const response = await fetch(`${workerUrl}/tv/popular`);
+            if (!response.ok) throw new Error('Failed to load TV shows');
+            const data = await response.json();
+            tvShows = data.results || [];
+        }
+
+        async function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            try {
+                await Promise.all([loadMovies(), loadTV()]);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                currentList = movies;
+                displayItems(movies);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        function displayItems(itemList) {
+            const grid = document.getElementById('movieGrid');
+            grid.innerHTML = '';
+            itemList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.onclick = () => selectItem(item);
+                const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
+                const title = item.title || item.name;
+                card.innerHTML = `
+                    <div class="poster-container">
+                        <img src="${poster}" alt="${title}">
+                        <i class="fas fa-play-circle play-icon"></i>
+                    </div>
+                    <h3>${title}</h3>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectItem(item) {
+            let url = `player.html?type=${currentType}&id=${item.id}&title=${encodeURIComponent(item.title || item.name)}`;
+            if (currentType === 'tv') {
+                url += '&season=1&episode=1';
+            }
+            window.open(url, '_blank');
+        }
+
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = currentList.filter(item => (item.title || item.name).toLowerCase().includes(query));
+            displayItems(filtered);
+        });
+
+        document.getElementById('moviesBtn').addEventListener('click', () => {
+            currentType = 'movie';
+            currentList = movies;
+            document.getElementById('moviesBtn').classList.add('active');
+            document.getElementById('tvBtn').classList.remove('active');
+            document.getElementById('searchInput').placeholder = 'Search movies...';
+            displayItems(movies);
+        });
+
+        document.getElementById('tvBtn').addEventListener('click', () => {
+            currentType = 'tv';
+            currentList = tvShows;
+            document.getElementById('tvBtn').classList.add('active');
+            document.getElementById('moviesBtn').classList.remove('active');
+            document.getElementById('searchInput').placeholder = 'Search TV shows...';
+            displayItems(tvShows);
+        });
+
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>
