@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Movie Stream</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body { font-family: Arial; background: #0e0e0e; color: #fff; text-align: center; margin: 0; padding: 20px; }
+    input { width: 80%; max-width: 600px; padding: 10px; border-radius: 6px; border: none; margin: 20px 0; }
+    .movie-list { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    button { background: #e50914; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 300px; }
+    button:hover { background: #b00610; }
+    video { width: 90%; max-width: 720px; margin-top: 20px; border-radius: 10px; background: #000; }
+    .loading { color: #aaa; }
+  </style>
+</head>
+<body>
+
+  <h1>🎥 Movie Stream Player</h1>
+  <input type="text" id="search" placeholder="Search movie title...">
+  <div class="movie-list" id="movieList">
+    <p class="loading">Loading movies...</p>
+  </div>
+
+  <video id="video" controls autoplay></video>
+
+  <script>
+    const movieList = document.getElementById("movieList");
+    const searchInput = document.getElementById("search");
+    const video = document.getElementById("video");
+    let movies = [];
+
+    async function loadMovies() {
+      try {
+        const res = await fetch("movies.json");
+        movies = await res.json();
+        renderList();
+      } catch (err) {
+        movieList.innerHTML = "<p style='color:red;'>Failed to load movie list.</p>";
+      }
+    }
+
+    function renderList(filter = "") {
+      movieList.innerHTML = "";
+      const filtered = movies.filter(m => m.title.toLowerCase().includes(filter.toLowerCase()));
+      if (filtered.length === 0) {
+        movieList.innerHTML = "<p>No movies found.</p>";
+        return;
+      }
+      filtered.forEach(movie => {
+        const btn = document.createElement("button");
+        btn.textContent = movie.title;
+        btn.onclick = () => playMovie(movie.src);
+        movieList.appendChild(btn);
+      });
+    }
+
+    function playMovie(url) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+      } else {
+        alert("Your browser doesn't support HLS playback.");
+      }
+    }
+
+    searchInput.addEventListener("input", e => renderList(e.target.value));
+
+    loadMovies();
+  </script>
+
+</body>
+</html>
