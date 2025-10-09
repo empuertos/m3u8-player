@@ -1,307 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Website</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #00FF9D;
-            --secondary: #1a1a2e;
-            --dark: #16213e;
-            --light: #f0f0f0;
-            --text: #e6e6e6;
-            --accent: #ff2e63;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--secondary);
-            color: var(--text);
-        }
-        header {
-            position: sticky;
-            top: 0;
-            background-color: var(--secondary);
-            z-index: 100;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .nav {
-            margin-bottom: 20px;
-        }
-        .nav button {
-            padding: 10px 20px;
-            margin-right: 10px;
-            background-color: var(--primary);
-            color: var(--secondary);
-            border: none;
-            cursor: pointer;
-        }
-        .nav button.active {
-            background-color: #00cc7a;
-        }
-        .search {
-            margin-bottom: 20px;
-        }
-        .search input {
-            width: 300px;
-            padding: 10px;
-        }
-        .movie-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .movie-card {
-            background-color: var(--dark);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: transform 0.2s;
-            color: var(--text);
-        }
-        .movie-card:hover {
-            transform: scale(1.05);
-        }
-        .movie-card img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-        .movie-card h3 {
-            padding: 10px;
-            margin: 0;
-            font-size: 16px;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-size: 18px;
-            color: #666;
-        }
-        .error {
-            text-align: center;
-            padding: 20px;
-            font-size: 18px;
-            color: red;
-        }
-        .modal {
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background: linear-gradient(to bottom right, var(--dark), var(--secondary));
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 900px;
-            width: 90%;
-            position: relative;
-            color: var(--text);
-        }
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 28px;
-            cursor: pointer;
-            z-index: 1001;
-        }
-        .video-container {
-            width: 100%;
-            height: 500px;
-            margin-bottom: 20px;
-        }
-        .video-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            header {
-                padding: 10px;
-            }
-            .nav {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .nav button {
-                margin: 5px;
-                flex: 1;
-                min-width: 100px;
-            }
-            .search input {
-                width: 100%;
-                box-sizing: border-box;
-            }
-            .movie-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 10px;
-                padding: 10px;
-            }
-            .movie-card img {
-                height: 200px;
-            }
-            .modal-content {
-                width: 95%;
-                padding: 10px;
-            }
-            .video-container {
-                height: 250px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Player JSON (Auto-Paging)</title>
+<style>
+  body {background:#000;color:#fff;font-family:Arial,sans-serif;text-align:center;}
+  h1 {margin-top:20px;color:#00ff9d;}
+  input {width:80%;padding:12px;margin:15px 0;font-size:18px;border-radius:8px;border:none;outline:none;}
+  #list {max-height:400px;overflow-y:auto;width:80%;margin:0 auto;text-align:left;}
+  #list div {padding:10px;cursor:pointer;background:#111;margin-bottom:5px;border-radius:6px;transition:0.2s;}
+  #list div:hover {background:#222;}
+  iframe {width:80%;height:480px;border:none;margin-top:20px;border-radius:10px;}
+</style>
 </head>
 <body>
-    <header>
-        <h1 style="color: var(--primary);">Movie Website</h1>
-        <div class="nav">
-            <button id="moviesBtn" class="active">Movies</button>
-            <button id="tvBtn">TV Shows</button>
-        </div>
-        <div class="search">
-            <input type="text" id="searchInput" placeholder="Search movies and TV shows...">
-        </div>
-    </header>
-    <div id="loading" class="loading" style="display: none;">Loading movies and TV shows...</div>
-    <div id="error" class="error" style="display: none;">Failed to load data. Please try again later.</div>
-    <div id="content">
-        <div class="movie-grid" id="movieGrid"></div>
-    </div>
+  <h1>🎬 Movie Player JSON</h1>
+  <input type="text" id="search" placeholder="Search movie title...">
+  <div id="list"></div>
+  <div id="player"></div>
 
-    <!-- Modal for video player -->
-    <div id="movieModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <div class="video-container">
-                <iframe id="videoIframe" allowfullscreen></iframe>
-            </div>
-        </div>
-    </div>
+<script>
+const totalFiles = 4; // number of JSON files
+let cache = {};       // cache loaded files
+let allMovies = [];   // search results
 
-    <script>
-        const workerUrl = 'https://movies.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev';
-        let movies = [];
-        let tvShows = [];
-        let currentType = 'movie';
-        let currentList = [];
+// Fetch a JSON file if not cached
+async function getMoviesFile(i){
+  if(cache[i]) return cache[i];
+  try {
+    const res = await fetch(`./movies/movies${i}.json`);
+    const data = await res.json();
+    cache[i] = data;
+    return data;
+  } catch {
+    console.warn(`movies${i}.json missing`);
+    cache[i] = [];
+    return [];
+  }
+}
 
-        async function loadMovies() {
-            const response = await fetch(`${workerUrl}/movie/popular?page=1`);
-            if (!response.ok) throw new Error('Failed to load movies');
-            const data = await response.json();
-            movies = data.results.map(item => ({ ...item, id: item.id, name: item.title, type: 'movie' }));
-        }
+// Search across files dynamically
+async function searchMovies(keyword){
+  const key = keyword.toLowerCase();
+  allMovies = [];
+  document.getElementById('list').innerHTML = '<div>Searching...</div>';
 
-        async function loadTV() {
-            const response = await fetch(`${workerUrl}/tv/popular?page=1`);
-            if (!response.ok) throw new Error('Failed to load TV shows');
-            const data = await response.json();
-            tvShows = data.results.map(item => ({ ...item, id: item.id, name: item.name, type: 'tv' }));
-        }
+  for(let i=1;i<=totalFiles;i++){
+    const file = await getMoviesFile(i);
+    const matches = file.filter(m=>m.title.toLowerCase().includes(key));
+    if(matches.length>0){
+      allMovies = allMovies.concat(matches);
+      // show partial results as we find them
+      updateList(allMovies.slice(0,30));
+    }
+  }
 
-        async function loadData() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('content').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
-            try {
-                await Promise.all([loadMovies(), loadTV()]);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-                currentList = movies;
-                displayItems(movies);
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-            }
-        }
+  if(allMovies.length===0)
+    document.getElementById('list').innerHTML='<div>No results found.</div>';
+}
 
-        function displayItems(itemList) {
-            const grid = document.getElementById('movieGrid');
-            grid.innerHTML = '';
-            itemList.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'movie-card';
-                card.onclick = () => selectItem(item);
-                const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
-                const title = item.title || item.name;
-                card.innerHTML = `
-                    <img src="${poster}" alt="${title}">
-                    <h3>${title}</h3>
-                `;
-                grid.appendChild(card);
-            });
-        }
+// Display search results
+function updateList(arr){
+  const listDiv=document.getElementById('list');
+  listDiv.innerHTML = arr.slice(0,30).map(m =>
+    `<div onclick="playMovie('${m.src.replace(/'/g,"\\'")}')">${m.title}</div>`
+  ).join('');
+}
 
-        function selectItem(item) {
-            const type = item.type || currentType;
-            const url = type === 'movie'
-                ? `${workerUrl}/movie/${item.id}`
-                : `${workerUrl}/tv/${item.id}/1/1`; // Default to season 1 episode 1 for TV
-            document.getElementById('videoIframe').src = url;
-            document.getElementById('movieModal').style.display = 'flex';
-        }
+// Play selected movie
+function playMovie(src){
+  document.getElementById('player').innerHTML=
+    `<iframe src="${src}" allowfullscreen loading="lazy"></iframe>`;
+}
 
-        function closeModal() {
-            document.getElementById('movieModal').style.display = 'none';
-            document.getElementById('videoIframe').src = 'about:blank';
-        }
-
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            if (query) {
-                const allItems = [...movies, ...tvShows];
-                const filtered = allItems.filter(item => (item.title || item.name).toLowerCase().includes(query));
-                displayItems(filtered);
-            } else {
-                displayItems(currentList);
-            }
-        });
-
-        document.getElementById('moviesBtn').addEventListener('click', () => {
-            currentType = 'movie';
-            currentList = movies;
-            document.getElementById('moviesBtn').classList.add('active');
-            document.getElementById('tvBtn').classList.remove('active');
-            document.getElementById('searchInput').placeholder = 'Search movies...';
-            displayItems(movies);
-        });
-
-        document.getElementById('tvBtn').addEventListener('click', () => {
-            currentType = 'tv';
-            currentList = tvShows;
-            document.getElementById('tvBtn').classList.add('active');
-            document.getElementById('moviesBtn').classList.remove('active');
-            document.getElementById('searchInput').placeholder = 'Search TV shows...';
-            displayItems(tvShows);
-        });
-
-        // Modal event listeners
-        document.getElementById('closeModal').addEventListener('click', closeModal);
-        window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('movieModal')) {
-                closeModal();
-            }
-        });
-
-        // Load data on page load
-        loadData();
-    </script>
+// Input event
+let timer;
+document.getElementById('search').addEventListener('input', e=>{
+  clearTimeout(timer);
+  const val=e.target.value.trim();
+  if(val.length<2){document.getElementById('list').innerHTML='';return;}
+  timer=setTimeout(()=>searchMovies(val),300);
+});
+</script>
 </body>
 </html>
