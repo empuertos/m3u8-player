@@ -161,9 +161,11 @@
         }
 
         function selectItem(item) {
-            let url = `player.html?type=${currentType}&id=${item.id}&title=${encodeURIComponent(item.title || item.name)}`;
-            if (currentType === 'tv') {
-                url += '&season=1&episode=1';
+            let url = 'https://movies.22afed28-f0b2-46d0-8804-c90e25c90bd4.workers.dev/';
+            if (currentType === 'movie') {
+                url += `movie/${item.id}`;
+            } else if (currentType === 'tv') {
+                url += `tv/${item.id}/1/1`;
             }
             window.open(url, '_blank');
         }
