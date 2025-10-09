@@ -129,6 +129,42 @@
             height: 100%;
             border: none;
         }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            header {
+                padding: 10px;
+            }
+            .nav {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .nav button {
+                margin: 5px;
+                flex: 1;
+                min-width: 100px;
+            }
+            .search input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+                padding: 10px;
+            }
+            .movie-card img {
+                height: 200px;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 10px;
+            }
+            .video-container {
+                height: 250px;
+            }
+        }
     </style>
 </head>
 <body>
