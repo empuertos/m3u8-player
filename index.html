@@ -2,270 +2,403 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Movie Library — Encoded JSON (Dark)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>StevensonFlix — Movie Library</title>
 <style>
-  :root{
-    --bg:#071018; --panel:#0f1720; --muted:#9aa6b2; --accent:#00ff9d;
-    --card:#0b1116;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,Segoe UI,Arial;background:linear-gradient(180deg,#02050a 0%, var(--bg) 100%);color:#e6eef3}
-  header{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#00b589);display:flex;align-items:center;justify-content:center;color:#001;border:2px solid rgba(255,255,255,0.06);font-weight:700}
-  h1{font-size:18px;margin:0}
-  .controls{display:flex;gap:10px;align-items:center}
-  #search{width:420px;max-width:60vw;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:#07121a;color:var(--muted);outline:none}
-  main{padding:18px;display:grid;grid-template-columns:1fr 420px;gap:18px}
-  .left{min-width:0}
-  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
-  .card{background:var(--card);border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.6);transition:transform .14s,box-shadow .14s}
-  .card:hover{transform:translateY(-6px);box-shadow:0 14px 40px rgba(0,0,0,0.7)}
-  .thumb{width:100%;height:230px;object-fit:cover;background:#081218}
-  .meta{padding:10px;font-size:13px;color:var(--muted);min-height:44px}
-  .meta .title{color:#fff;font-weight:600;margin-bottom:6px;font-size:14px}
-  #pagination{display:flex;gap:8px;align-items:center;justify-content:center;padding:12px 0;color:var(--muted)}
-  .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
-  .btn:disabled{opacity:.35;cursor:not-allowed}
-  .player-panel{background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.4));padding:14px;border-radius:10px;position:sticky;top:18px;height:calc(100vh - 72px);overflow:auto}
-  .player-title{font-weight:700;margin:0 0 8px 0}
-  .player-frame{width:100%;height:360px;border-radius:8px;border:0;background:#000}
-  .small{font-size:13px;color:var(--muted)}
-  .empty{padding:40px;text-align:center;color:var(--muted)}
-  footer{padding:12px 20px;color:var(--muted);font-size:13px;border-top:1px solid rgba(255,255,255,0.02)}
-  @media(max-width:980px){
-    main{grid-template-columns:1fr; padding:14px}
-    .player-panel{position:relative;height:auto}
-    #search{width:100%}
-  }
+:root{
+  --bg:#05060a;
+  --panel:#0c1116;
+  --card:#0f1720;
+  --muted:#98a4b2;
+  --accent:#00ff9d;
+  --glass: rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg,#02050a 0%, var(--bg) 100%);
+  color: #e7eef7;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-y: auto;
+}
+
+/* ===== Header ===== */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  border-bottom:1px solid var(--glass);
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo-badge {
+  width:46px; height:46px; border-radius:10px;
+  background: linear-gradient(135deg,var(--accent),#00b589);
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#001;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+.site-title { font-weight:700; font-size:18px; letter-spacing:.4px; color: #fff; }
+.site-sub { font-size:12px; color:var(--muted); margin-top:3px; }
+
+/* controls */
+.controls { display:flex; gap:12px; align-items:center; }
+.search {
+  width:360px; max-width:48vw; min-width:160px;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); background:#09121a; color:var(--muted);
+  outline:none;
+}
+.search::placeholder{color:rgba(255,255,255,0.22)}
+.icon { opacity:0.6 }
+
+/* ===== Category bar ===== */
+.categories {
+  display:flex;
+  gap:8px;
+  padding:14px 20px;
+  overflow:auto;
+  border-bottom:1px solid var(--glass);
+  background: linear-gradient(180deg, rgba(255,255,255,0.005), transparent);
+}
+.cat {
+  padding:8px 12px; border-radius:999px; background:#0b151e; color:var(--muted); font-size:13px; cursor:pointer;
+  border:1px solid rgba(255,255,255,0.02); white-space:nowrap;
+}
+.cat:hover{ transform:translateY(-3px); color:var(--accent) }
+.cat.active{ background:var(--accent); color:#001; font-weight:700; transform:none; }
+
+/* ===== Layout ===== */
+.container {
+  display:grid;
+  grid-template-columns: 1fr 380px;
+  gap:20px;
+  padding:18px 20px 40px;
+}
+@media(max-width:980px){ .container{ grid-template-columns:1fr; padding:14px } }
+
+/* grid */
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap:14px;
+}
+.card {
+  background:var(--card); border-radius:12px; overflow:hidden; cursor:pointer; transform:translateY(0);
+  transition: transform .25s cubic-bezier(.22,.9,.38,1), box-shadow .18s;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.6);
+  opacity:0; transform: translateY(8px) scale(.995);
+  animation: fadeUp .42s ease forwards;
+}
+.card:hover { transform:translateY(-8px) scale(1.02); box-shadow: 0 18px 48px rgba(0,0,0,0.7); }
+.thumb { width:100%; height:240px; object-fit:cover; display:block; background:#07121a }
+.meta { padding:10px 12px; font-size:13px; color:var(--muted) }
+.title { color:#fff; font-weight:700; margin-bottom:6px; font-size:14px; }
+.catlabel { font-size:12px; color:var(--muted) }
+
+/* player panel (right column) */
+.player {
+  position:sticky; top:78px; align-self:start;
+  background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
+  border-radius:12px; padding:14px; border:1px solid var(--glass);
+}
+.player .title { font-size:16px; font-weight:800; margin-bottom:8px; }
+.player .frame { width:100%; height:320px; border-radius:8px; border:0; background:#000; display:block; }
+
+/* pagination */
+.pagination { display:flex; gap:8px; align-items:center; justify-content:center; margin-top:14px; flex-wrap:wrap }
+.btn {
+  padding:8px 12px; border-radius:8px; background:#0e1720; color:var(--muted); border:1px solid rgba(255,255,255,0.03); cursor:pointer;
+}
+.btn:hover{ color:var(--accent); border-color:var(--accent) }
+.btn:disabled{ opacity:.35; cursor:not-allowed }
+
+/* modal player */
+.modal {
+  position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:999;
+  background: rgba(0,0,0,0.66); opacity:0; pointer-events:none; transition:opacity .22s;
+}
+.modal.show { opacity:1; pointer-events:auto; }
+.modal-inner {
+  width: min(1200px, 96vw); max-height:88vh; background: #071018; border-radius:12px; overflow:hidden; box-shadow:0 40px 120px rgba(0,0,0,0.8);
+  transform: translateY(20px); transition: transform .28s cubic-bezier(.2,.9,.3,1);
+}
+.modal.show .modal-inner { transform: translateY(0) }
+.modal-header { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--glass) }
+.modal-title { font-weight:800 }
+.modal-close { background:transparent; border:0; color:var(--muted); font-size:18px; cursor:pointer; padding:8px }
+
+/* subtle animations */
+@keyframes fadeUp {
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* small screens */
+@media(max-width:600px){
+  .thumb{height:180px}
+  .player .frame{height:220px}
+  .search{width:100%}
+  .logo-badge{width:40px;height:40px}
+}
 </style>
 </head>
 <body>
-<header>
+
+<!-- HEADER -->
+<header class="header">
   <div class="brand">
-    <div class="logo">ML</div>
+    <div class="logo-badge">SF</div>
     <div>
-      <h1>Movie Library</h1>
-      <div style="font-size:12px;color:var(--muted)">Secure (Base64) JSON • Dark Theme</div>
+      <div class="site-title">StevensonFlix</div>
+      <div class="site-sub">Your Movie Library</div>
     </div>
   </div>
 
   <div class="controls">
-    <input id="search" placeholder="Search movies (type 2+ chars) — results load progressively" />
+    <input id="search" class="search" placeholder="Search movies — type 2+ characters" aria-label="Search movies">
   </div>
 </header>
 
-<main>
-  <section class="left">
-    <div id="grid" aria-live="polite"><div class="empty">Type to search movies...</div></div>
-    <div id="pagination"></div>
-  </section>
+<!-- CATEGORIES -->
+<div class="categories" id="categories">
+  <div class="cat active" data-cat="all">All</div>
+  <div class="cat" data-cat="Action">Action</div>
+  <div class="cat" data-cat="Drama">Drama</div>
+  <div class="cat" data-cat="Comedy">Comedy</div>
+  <div class="cat" data-cat="Horror">Horror</div>
+  <div class="cat" data-cat="Romance">Romance</div>
+  <div class="cat" data-cat="Sci-Fi">Sci-Fi</div>
+  <div class="cat" data-cat="Adventure">Adventure</div>
+  <div class="cat" data-cat="Documentary">Documentary</div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="container">
+  <main>
+    <section>
+      <div id="grid" class="grid"><div class="empty" style="padding:40px;color:var(--muted)">Start by searching or choosing a category</div></div>
+      <div class="pagination" id="pagination"></div>
+    </section>
+  </main>
 
   <aside>
-    <div class="player-panel">
-      <div id="player-info">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <img id="player-poster" src="" alt="" style="width:86px;height:120px;border-radius:6px;object-fit:cover;background:#071218" />
-          <div>
-            <div id="player-title" class="player-title">No movie selected</div>
-            <div class="small" id="player-sub">Click a poster to play</div>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:12px">
-        <div id="player-wrap">
-          <!-- iframe injected here -->
-          <div class="empty">Player will appear here</div>
-        </div>
-      </div>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:14px 0" />
-      <div style="font-size:13px;color:var(--muted)">
-        <strong>Instructions</strong>
-        <ul style="padding-left:18px;margin:8px 0;color:var(--muted)">
-          <li>Upload encoded files: <code>encoded_movies1.json</code> … <code>encoded_movies5.json</code> to repo root.</li>
-          <li>Each file must be: <code>{"data":"&lt;base64...&gt;"}</code></li>
-          <li>Search loads files lazily and caches them for faster subsequent queries.</li>
-        </ul>
-      </div>
+    <div class="player">
+      <div class="title" id="player-title">Select a movie</div>
+      <iframe id="player-frame" class="frame" allowfullscreen sandbox="allow-scripts allow-same-origin"></iframe>
+      <div style="margin-top:12px;color:var(--muted);font-size:13px" id="player-meta">No selection</div>
     </div>
   </aside>
-</main>
+</div>
 
-<footer>Files: encoded_movies1.json … encoded_movies5.json • Page works on GitHub Pages</footer>
+<!-- Modal -->
+<div id="modal" class="modal" role="dialog" aria-hidden="true">
+  <div class="modal-inner" role="document">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Playing</div>
+      <button class="modal-close" id="modal-close" aria-label="Close player">✕</button>
+    </div>
+    <div id="modal-body" style="background:#000; height:calc(88vh - 64px); display:flex; align-items:center; justify-content:center;">
+      <!-- iframe injected here -->
+    </div>
+  </div>
+</div>
+
+<footer style="padding:18px 20px; color:var(--muted); text-align:center; border-top:1px solid var(--glass)">
+  © 2025 StevensonFlix — Built for GitHub Pages
+</footer>
 
 <script>
-/*
-  Config
-  - totalFiles: how many encoded JSON files you have (1..n)
-  - pageSize: results per page shown in grid
-  - jsonPath(prefix + n + suffix): path to encoded files (adjust if located in /movies/ folder)
-*/
-const totalFiles = 5;
-const pageSize = 24;
-const jsonPrefix = './encoded_movies'; // will fetch ./encoded_movies1.json etc.
+/* ========== CONFIG ========== */
+const totalFiles = 5;                // number of encoded files
+const jsonPrefix = './encoded_movies'; // e.g. encoded_movies1.json ...
 const jsonSuffix = '.json';
+const pageSize = 24;
 
-let cache = {};        // {n: [movie,...]}
-let results = [];      // filtered results list
+/* ========== STATE ========== */
+let cache = {};      // fileIndex -> [movies]
+let results = [];    // filtered results
 let page = 1;
+let currentCategory = 'all';
 let lastQuery = '';
+let typingTimer = null;
 
-// Utility: decode base64 and parse JSON
-function decodeBase64Str(b64){
-  try{
-    // atob can fail for very large strings on some browsers; use this fallback if needed.
-    return JSON.parse(atob(b64));
-  }catch(e){
-    try{
-      // fallback for very large data: chunk decode (rarely needed)
-      let bin = atob(b64);
-      return JSON.parse(bin);
-    }catch(err){
-      console.error("Decode error", err);
-      return [];
-    }
-  }
+/* ========== UTILITIES ========== */
+function safeText(s){ return String(s||'').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function decodeBase64(b64){
+  try { return JSON.parse(atob(b64)); }
+  catch(e){ console.error('Decode failed', e); return []; }
 }
 
-// Fetch and decode encoded file i (1-based)
-async function fetchEncodedFile(i){
+/* ===== fetch encoded JSON lazily and cache ===== */
+async function fetchEncoded(i){
   if(cache[i]) return cache[i];
-  try{
-    const res = await fetch(`${jsonPrefix}${i}${jsonSuffix}`, {cache: 'no-cache'});
-    if(!res.ok) { console.warn('Missing file:', i); cache[i]=[]; return []; }
+  try {
+    const res = await fetch(`${jsonPrefix}${i}${jsonSuffix}`, {cache:'no-cache'});
+    if(!res.ok){ cache[i]=[]; return []; }
     const obj = await res.json();
-    if(!obj || !obj.data){ console.warn('No data property in', `${jsonPrefix}${i}${jsonSuffix}`); cache[i]=[]; return []; }
-    const decoded = decodeBase64Str(obj.data);
+    if(!obj || !obj.data){ cache[i]=[]; return []; }
+    const decoded = decodeBase64(obj.data);
     cache[i] = decoded;
-    console.log(`Loaded encoded file ${i} (${decoded.length} entries)`);
+    console.log(`Loaded encoded file ${i} (${decoded.length || 0} entries)`);
     return decoded;
-  }catch(e){
-    console.error('Error fetching encoded file', i, e);
-    cache[i] = [];
-    return [];
+  } catch(e){
+    console.error('Error loading encoded file', i, e);
+    cache[i]=[]; return [];
   }
 }
 
-// Search by loading files progressively
-let searchAbortToken = { cancelled:false };
-async function performSearch(query){
-  // cancel previous searches
-  searchAbortToken.cancelled = true;
-  searchAbortToken = { cancelled:false };
-  const token = searchAbortToken;
-
-  lastQuery = query;
+/* ===== incremental search/filter ===== */
+async function runQuery(){
   results = [];
   page = 1;
-  updateGridEmpty('Searching…');
+  const q = lastQuery.trim().toLowerCase();
+  setGridMessage('Searching…');
 
-  const q = query.toLowerCase();
-  // Iterate files one by one (stops early if heavy matches)
+  // iterate files progressively (stop early if huge result)
   for(let i=1;i<=totalFiles;i++){
-    if(token.cancelled) return;
-    const fileData = await fetchEncodedFile(i);
-    if(token.cancelled) return;
-    // filter in this file
-    const matched = fileData.filter(m => (m.title || '').toLowerCase().includes(q));
-    if(matched && matched.length) results = results.concat(matched);
-    // show incremental results so users see something quickly
+    const arr = await fetchEncoded(i);
+    const matches = arr.filter(m => {
+      const titleMatch = !q || (m.title || '').toLowerCase().includes(q);
+      const catMatch = currentCategory === 'all' || (m.category || '').toLowerCase() === currentCategory.toLowerCase();
+      return titleMatch && catMatch;
+    });
+    if(matches.length) results = results.concat(matches);
+    // show incremental update
     renderPage();
-    // small optimization: if too many results found, we can stop early
-    if(results.length > 1000) {
-      console.log('Large result set, stopping further file reads for speed');
-      break;
-    }
+    if(results.length > 1500) { console.log('Large result set, stopping file reads'); break; }
   }
-
-  if(!results.length) updateGridEmpty('No results found');
+  if(!results.length) setGridMessage('No results found');
   renderPage();
 }
 
-// UI helpers
-function updateGridEmpty(msg){
+/* ===== UI renderers ===== */
+function setGridMessage(msg){
   const g = document.getElementById('grid');
-  g.innerHTML = `<div class="empty" style="padding:40px;color:var(--muted)">${msg}</div>`;
+  g.innerHTML = `<div class="empty" style="padding:40px;color:var(--muted)">${safeText(msg)}</div>`;
   document.getElementById('pagination').innerHTML = '';
 }
 
 function renderPage(){
-  const g = document.getElementById('grid');
-  if(!results.length){ updateGridEmpty('No results yet — type to search'); return; }
-
+  const grid = document.getElementById('grid');
+  if(!results.length){ setGridMessage('No results'); return; }
   const totalPages = Math.max(1, Math.ceil(results.length / pageSize));
   if(page > totalPages) page = totalPages;
-
-  const start = (page-1) * pageSize;
+  const start = (page - 1) * pageSize;
   const slice = results.slice(start, start + pageSize);
 
-  g.innerHTML = slice.map(m => {
-    const poster = m.poster || 'https://via.placeholder.com/300x430?text=No+Image';
-    // sanitize title for HTML by simple replace (avoid injection)
-    const safeTitle = String(m.title || '').replaceAll('<','&lt;').replaceAll('>','&gt;');
-    const srcEsc = String(m.iframe || m.src || m.url || '').replaceAll("'", "\\'");
+  grid.innerHTML = slice.map(m => {
+    const poster = m.poster || `https://via.placeholder.com/300x430?text=No+Image`;
+    const title = safeText(m.title || 'Untitled');
+    const cat = safeText(m.category || 'Unknown');
+    // store iframe/src in data-src attribute
+    const src = (m.iframe || m.src || '');
     return `
-      <div class="card" data-src="${srcEsc}" onclick="selectMovieFromCard('${srcEsc.replace(/'/g,'\\'\\'')}')">
-        <img class="thumb" loading="lazy" src="${poster}" alt="${safeTitle}">
+      <div class="card" data-src="${encodeURI(src)}" data-title="${title}" data-poster="${encodeURI(poster)}">
+        <img class="thumb" loading="lazy" src="${poster}" alt="${title}">
         <div class="meta">
-          <div class="title">${safeTitle}</div>
-          <div class="small">${m.id ? 'ID: ' + m.id : ''}</div>
+          <div class="title">${title}</div>
+          <div class="catlabel">${cat}</div>
         </div>
       </div>`;
   }).join('');
 
-  // pagination UI
+  // small stagger animation delay
+  Array.from(document.querySelectorAll('.card')).forEach((el, idx)=>{
+    el.style.animationDelay = (idx * 18)+'ms';
+  });
+
+  // pagination
   document.getElementById('pagination').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;gap:10px">
-      <button class="btn" ${page<=1?'disabled':''} onclick="changePage(-1)">◀ Prev</button>
-      <div style="line-height:34px;color:var(--muted)">Page ${page} / ${totalPages} • ${results.length} results</div>
-      <button class="btn" ${page>=totalPages?'disabled':''} onclick="changePage(1)">Next ▶</button>
-    </div>`;
+    <button class="btn" ${page <= 1 ? 'disabled' : ''} onclick="changePage(-1)">◀ Prev</button>
+    <div style="color:var(--muted);line-height:34px">Page ${page} / ${totalPages} • ${results.length} results</div>
+    <button class="btn" ${page >= totalPages ? 'disabled' : ''} onclick="changePage(1)">Next ▶</button>
+  `;
 }
 
-// Change page from pagination controls
+/* ===== paging ===== */
 function changePage(dir){
   page += dir;
+  if(page < 1) page = 1;
   renderPage();
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:200, behavior:'smooth'});
 }
 
-// Card click handler: receives src string
-function selectMovieFromCard(src){
-  // src may be empty
-  if(!src){ alert('No player source available for this item'); return; }
-  // show info
-  const playerTitle = document.getElementById('player-title');
-  const playerPoster = document.getElementById('player-poster');
-  // find selected movie object in results for better metadata if present
-  const found = results.find(m => (m.iframe||m.src||m.url||'').toString() === src) || {};
-  playerTitle.textContent = found.title || 'Selected Movie';
-  playerPoster.src = found.poster || 'https://via.placeholder.com/300x430?text=No+Image';
-  // inject iframe
-  const wrap = document.getElementById('player-wrap');
-  wrap.innerHTML = `<iframe class="player-frame" src="${src}" allowfullscreen loading="lazy"></iframe>`;
+/* ===== card click -> show player in modal + side player ===== */
+function onCardClick(e){
+  const card = e.target.closest('.card');
+  if(!card) return;
+  const src = decodeURIComponent(card.dataset.src || '');
+  const title = card.dataset.title || 'Selected Movie';
+  const poster = decodeURIComponent(card.dataset.poster || '');
+  // update side player
+  document.getElementById('player-title').textContent = title;
+  document.getElementById('player-frame').src = src;
+  document.getElementById('player-meta').textContent = `Category: ${card.querySelector('.catlabel')?.textContent || 'Unknown'}`;
+
+  // open modal for large playback (mobile-friendly)
+  openModal(src, title);
 }
 
-// Hook up search input
-const input = document.getElementById('search');
-let typingTimer;
-input.addEventListener('input', e => {
+/* ===== modal functions ===== */
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modal-body');
+const modalTitle = document.getElementById('modal-title');
+function openModal(src, title){
+  modalTitle.textContent = title || 'Playing';
+  modalBody.innerHTML = `<iframe src="${src}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>`;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  modal.classList.remove('show');
+  modalBody.innerHTML = '';
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+}
+
+/* ===== event wiring ===== */
+document.getElementById('grid').addEventListener('click', onCardClick);
+document.getElementById('modal-close').addEventListener('click', closeModal);
+modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+/* ===== search & categories handlers ===== */
+document.getElementById('search').addEventListener('input', (e)=>{
   clearTimeout(typingTimer);
-  const v = e.target.value.trim();
-  if(v.length < 2){
-    document.getElementById('grid').innerHTML = '<div class="empty">Type 2+ characters to start searching...</div>';
-    document.getElementById('pagination').innerHTML = '';
-    return;
-  }
-  typingTimer = setTimeout(() => performSearch(v), 240);
+  const v = e.target.value;
+  lastQuery = v;
+  typingTimer = setTimeout(()=> {
+    if(String(lastQuery).trim().length < 2 && currentCategory === 'all'){
+      setGridMessage('Type 2+ characters or pick a category');
+      return;
+    }
+    runQuery();
+  }, 260);
 });
 
-// Expose function to global (used by generated onclick in card)
-window.selectMovieFromCard = function(src){ selectMovieFromCard(src) };
+document.getElementById('categories').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.cat');
+  if(!btn) return;
+  document.querySelectorAll('.cat').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  currentCategory = btn.dataset.cat || 'all';
+  // if no search term, still run to load category
+  runQuery();
+});
 
-// optional: prefetch first encoded file in background for snappy initial searches
-fetchEncodedFile(1).catch(()=>{});
+/* ===== prefetch first file lightly ===== */
+fetchEncoded(1).catch(()=>{});
 </script>
 </body>
 </html>
