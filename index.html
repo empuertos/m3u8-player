@@ -366,9 +366,7 @@
             document.querySelector('.modal-poster-container').style.display = 'none';
             document.getElementById('videoContainer').style.display = 'block';
             const type = selectedItem.type || currentType;
-            const url = type === 'movie'
-                ? `${workerUrl}/movie/${selectedItem.id}`
-                : `${workerUrl}/tv/${selectedItem.id}/${currentSeason}/${currentEpisode}`;
+            const url = workerUrl;
             document.getElementById('videoIframe').src = url;
         }
 
