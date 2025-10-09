@@ -199,7 +199,23 @@
             document.getElementById('content').style.display = 'none';
             document.getElementById('error').style.display = 'none';
             try {
-                await Promise.all([loadMovies(), loadTV()]);
+                const cached = localStorage.getItem('movieData');
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) { // 1 day
+                        movies = data.movies;
+                        tvShows = data.tvShows;
+                    } else {
+                        localStorage.removeItem('movieData');
+                        await Promise.all([loadMovies(), loadTV()]);
+                    }
+                } else {
+                    await Promise.all([loadMovies(), loadTV()]);
+                }
+                if (movies.length === 0 || tvShows.length === 0) {
+                    await Promise.all([loadMovies(), loadTV()]);
+                }
+                localStorage.setItem('movieData', JSON.stringify({ movies, tvShows, timestamp: Date.now() }));
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 currentList = movies;
