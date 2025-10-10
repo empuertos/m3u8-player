@@ -82,6 +82,25 @@
       background: #1e7e34;
     }
 
+    #directBtn {
+      background: #ffc107;
+      color: #000;
+      margin-top: 5px;
+    }
+
+    #directBtn:hover {
+      background: #e0a800;
+    }
+
+    #redirectBtn {
+      background: #dc3545;
+      margin-top: 5px;
+    }
+
+    #redirectBtn:hover {
+      background: #c82333;
+    }
+
     .player {
        background: #000;
        border-radius: 12px;
@@ -191,6 +210,14 @@
       <select id="provider"></select>
       <button id="refreshBtn">Refresh</button>
       <button id="testBtn">Test URL in New Window</button>
+      <button id="directBtn">Direct Link Test</button>
+      <button id="redirectBtn">Watch Video (Direct)</button>
+
+      <!-- Simple test link -->
+      <div style="margin: 10px 0; padding: 10px; background: #333; border-radius: 8px;">
+        <strong>Direct Test:</strong><br>
+        <a href="https://vidora.su/embed/movie/299534" target="_blank" style="color: #007bff;">Test Vidora URL</a>
+      </div>
 
       <div class="player" id="videoPlayer">
          <!-- iframe for embed URLs -->
@@ -280,15 +307,16 @@
           showError();
         };
 
-        // Check if iframe is actually loading content
+        // Fallback: Try redirect if iframe doesn't work
         setTimeout(() => {
-          try {
-            console.log("iframe content check - src:", iframe.src);
-            console.log("iframe display style:", iframe.style.display);
-          } catch (e) {
-            console.error("Error checking iframe:", e);
+          console.log("Checking if iframe loaded content...");
+          if (iframe.contentWindow && iframe.contentWindow.location) {
+            console.log("iframe content loaded");
+          } else {
+            console.log("iframe content not accessible, trying redirect...");
+            // window.location.href = url;
           }
-        }, 1000);
+        }, 2000);
 
       } catch (error) {
         console.error("Error in loadVideoIntoIframe:", error);
@@ -318,10 +346,27 @@
       }
     }
 
+    // Direct link test (alternative approach)
+    function directTest() {
+      const url = "https://vidora.su/embed/movie/299534";
+      window.open(url, '_blank');
+      console.log("Direct test URL:", url);
+    }
+
+    // Direct redirect to video (fallback method)
+    function redirectToVideo() {
+      const provider = document.getElementById("provider").value;
+      const url = providers[provider] || "https://vidora.su/embed/movie/299534";
+      console.log("Redirecting to video URL:", url);
+      window.location.href = url;
+    }
+
     // Init
     document.getElementById("refreshBtn").addEventListener("click", refreshVideo);
     document.getElementById("playButton").addEventListener("click", playMovie);
     document.getElementById("testBtn").addEventListener("click", testUrl);
+    document.getElementById("directBtn").addEventListener("click", directTest);
+    document.getElementById("redirectBtn").addEventListener("click", redirectToVideo);
 
     loadProviders();
   </script>
