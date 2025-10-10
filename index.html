@@ -208,6 +208,7 @@
 
       <label for="provider">Video Provider:</label>
       <select id="provider"></select>
+      <div id="providerStatus" style="font-size: 12px; color: #888; margin: 5px 0;">Loading providers...</div>
       <button id="refreshBtn">Refresh</button>
       <button id="testBtn">Test URL in New Window</button>
       <button id="directBtn">Direct Link Test</button>
@@ -246,22 +247,91 @@
 
     // Load providers.json
     async function loadProviders() {
+      console.log("Starting to load providers.json...");
+      updateProviderStatus("Loading providers...");
+
       try {
+        console.log("Fetching providers.json...");
         const res = await fetch("providers.json");
+        console.log("Fetch response status:", res.status);
+        console.log("Fetch response ok:", res.ok);
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        console.log("Parsing JSON response...");
         providers = await res.json();
+        console.log("Providers loaded successfully:", providers);
+
         const select = document.getElementById("provider");
+        if (!select) {
+          console.error("Provider select element not found!");
+          return;
+        }
+
         select.innerHTML = "";
+        console.log("Available providers:", Object.keys(providers));
 
         Object.keys(providers).forEach(key => {
           const option = document.createElement("option");
           option.value = key;
           option.textContent = key.charAt(0).toUpperCase() + key.slice(1);
           select.appendChild(option);
+          console.log("Added provider option:", key);
         });
+
         select.value = "vidora";
+        console.log("Provider dropdown populated successfully");
+        updateProviderStatus(`Loaded ${Object.keys(providers).length} providers successfully`);
+
       } catch (err) {
         console.error("Error loading providers:", err);
+        console.error("Error details:", {
+          message: err.message,
+          stack: err.stack,
+          providers: providers
+        });
+
+        // Show error to user
+        alert("Error loading video providers: " + err.message);
+
+        // Fallback: Add default provider manually
+        console.log("Adding fallback provider...");
+        providers = {
+          "vidora": "https://vidora.su/embed/movie/299534"
+        };
+        populateProviderDropdown();
+        updateProviderStatus("Using fallback provider (error loading providers.json)");
       }
+    }
+
+    // Update provider status display
+    function updateProviderStatus(message) {
+      const statusElement = document.getElementById("providerStatus");
+      if (statusElement) {
+        statusElement.textContent = message;
+        console.log("Status updated:", message);
+      }
+    }
+
+    // Fallback function to populate dropdown
+    function populateProviderDropdown() {
+      const select = document.getElementById("provider");
+      if (!select) return;
+
+      select.innerHTML = "";
+      console.log("Populating with fallback providers:", Object.keys(providers));
+
+      Object.keys(providers).forEach(key => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+        select.appendChild(option);
+      });
+
+      select.value = "vidora";
+      console.log("Fallback provider dropdown populated");
     }
 
     // Refresh and play selected provider
